@@ -1564,7 +1564,7 @@ body::after {
 .cap3-boton-lateral {
   position: absolute;
   z-index: 2;
-  top: 45.15625%;
+  top: calc(45.15625% + 20px);
   width: 62px;
   height: 62px;
   padding: 0;
@@ -1587,7 +1587,7 @@ body::after {
 .cap3-etiqueta-lateral {
   position: absolute;
   z-index: 2;
-  top: calc(45.15625% + 42px);
+  top: calc(45.15625% + 62px);
   color: #fff;
   font: 700 .66rem/1 system-ui, sans-serif;
   letter-spacing: .16em;
