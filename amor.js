@@ -1642,28 +1642,41 @@ const iniciarCapituloTres = (directo = false) => {
   cap2.ultimoTiempo = null;
   detenerAudioEscritura();
   detenerAudioPensamiento();
-  lienzo.classList.remove("escena-cinco-activa", "parpadeo-detectado", "transicion-capitulo-dos");
+  lienzo.classList.remove(
+    "mostrar-fondo-dos",
+    "escena-tres-activa",
+    "escena-cuatro-activa",
+    "escena-cinco-activa",
+    "chispa-pausada",
+    "parpadeo-detectado",
+    "transicion-capitulo-dos",
+    "recorrido-iniciado",
+    "recorrido-pausado"
+  );
   escenaCinco.classList.remove("esperando-parpadeos");
   intro.hidden = true;
   intro.inert = true;
+  posicionProtagonista.hidden = true;
   posicionProtagonista.inert = true;
   posicionProtagonista.setAttribute("aria-hidden", "true");
+  lienzo.querySelectorAll(".fondo").forEach((fondo) => { fondo.hidden = true; });
   document.querySelector(".mensaje-girar").hidden = true;
   document.querySelector(".inicio-orientacion").hidden = true;
   [escenaTres, escenaCuatro, escenaCinco].forEach((nodo) => {
+    nodo.hidden = true;
     nodo.inert = true;
     nodo.setAttribute("aria-hidden", "true");
   });
-  nodoCap2.classList.remove("visible", "en-pausa", "espera-cap3");
-  nodoCap2.hidden = true;
-  nodoCap2.inert = true;
-  nodoCap2.setAttribute("aria-hidden", "true");
   lienzo.classList.remove("capitulo-dos-activo");
   lienzo.classList.add("capitulo-tres-activo");
   nodoCap3.hidden = false;
   nodoCap3.inert = false;
   nodoCap3.setAttribute("aria-hidden", "false");
-  window.requestAnimationFrame(() => window.requestAnimationFrame(() => nodoCap3.classList.add("visible")));
+  nodoCap3.classList.add("visible");
+  nodoCap2.classList.remove("visible", "en-pausa", "espera-cap3");
+  nodoCap2.hidden = true;
+  nodoCap2.inert = true;
+  nodoCap2.setAttribute("aria-hidden", "true");
 };
 
 const sincronizarCapituloTres = () => {
@@ -2031,6 +2044,7 @@ nodoCap2.querySelector(".cap2-reintentar").addEventListener("click", () => {
 orientacionHorizontal.addEventListener?.("change", sincronizarCap2);
 document.addEventListener("visibilitychange", sincronizarCap2);
 window.addEventListener("resize", () => {
+  sincronizarCapituloTres();
   if (cap2.activo && cap2.estado === "caminata") pintarCaminataCap2();
 });
 if (parametros.get("capitulo") === "2") iniciarCapituloDos();
