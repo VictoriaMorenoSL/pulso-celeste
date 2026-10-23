@@ -5,12 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#1b141e">
   <title>Amor</title>
-  <link rel="stylesheet" href="amor.css?v=106">
+  <link rel="stylesheet" href="amor.css?v=107">
 </head>
 <body>
   <main class="lienzo">
     <button class="control-sonido-global sonido-activo" id="controlSonidoGlobal" type="button" aria-pressed="true" aria-label="Desactivar sonido">
       <img src="assets/volumen.svg" alt="" aria-hidden="true">
+    </button>
+    <button class="control-pantalla-global" id="controlPantallaGlobal" type="button" aria-pressed="false" aria-label="Activar pantalla completa">
+      <span class="icono-pantalla-completa" aria-hidden="true"></span>
     </button>
     <section class="permiso-camara" id="permisoCamara" aria-labelledby="tituloPermisoCamara">
       <p id="tituloPermisoCamara">ACTIVA LA CÁMARA PARA CONTINUAR</p>
@@ -229,6 +232,6 @@
     <button id="reiniciarRevision" type="button">Reiniciar</button>
     <button id="simularParpadeo" type="button" hidden>Simular parpadeo</button>
   </aside>
-  <script src="amor.js?v=112"></script>
+  <script src="amor.js?v=113"></script>
 </body>
 </html>

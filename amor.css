@@ -41,10 +41,10 @@ body::after {
   transition: width .9s cubic-bezier(.22, 1, .36, 1), aspect-ratio .9s cubic-bezier(.22, 1, .36, 1);
 }
 
-.control-sonido-global {
+.control-sonido-global,
+.control-pantalla-global {
   position: absolute;
   top: max(14px, env(safe-area-inset-top));
-  right: max(14px, env(safe-area-inset-right));
   z-index: 40;
   width: clamp(28px, 6.5vw, 34px);
   aspect-ratio: 1;
@@ -57,6 +57,13 @@ body::after {
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
   transition: opacity .25s ease, background-color .25s ease, transform .18s ease;
+}
+
+.control-sonido-global { right: max(14px, env(safe-area-inset-right)); }
+.control-pantalla-global {
+  right: calc(max(14px, env(safe-area-inset-right)) + clamp(38px, 8vw, 46px));
+  color: #fefcf6;
+  opacity: .6;
 }
 
 .control-sonido-global img { display: block; width: 100%; height: 100%; pointer-events: none; }
@@ -75,8 +82,28 @@ body::after {
 }
 .control-sonido-global.sonido-activo { background: rgb(20 16 27 / 36%); opacity: .6; }
 .control-sonido-global.sonido-activo::after { opacity: 0; }
-.control-sonido-global:active { transform: scale(.9); }
-.control-sonido-global:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
+.control-sonido-global:active,
+.control-pantalla-global:active { transform: scale(.9); }
+.control-sonido-global:focus-visible,
+.control-pantalla-global:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
+
+.icono-pantalla-completa {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 1.6px solid currentColor;
+  transition: transform .2s ease;
+}
+
+.control-pantalla-global.pantalla-completa-activa {
+  background: rgb(20 16 27 / 40%);
+  opacity: .82;
+}
+
+.control-pantalla-global.pantalla-completa-activa .icono-pantalla-completa {
+  transform: scale(.72);
+}
 
 .fondo {
   position: absolute;

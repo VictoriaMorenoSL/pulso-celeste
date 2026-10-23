@@ -1056,6 +1056,7 @@ const RECURSOS_CAP2 = Object.freeze({
 });
 const nodoCap2 = document.querySelector("#capituloDos");
 const botonSonidoGlobal = document.querySelector("#controlSonidoGlobal");
+const botonPantallaGlobal = document.querySelector("#controlPantallaGlobal");
 const accionCap2 = document.querySelector("#accionCapituloDos");
 const botonPressCap2 = document.querySelector("#botonPressCap2");
 const destelloPressCap2 = document.querySelector("#destelloPressCap2");
@@ -1942,6 +1943,38 @@ botonSonidoGlobal.addEventListener("click", () => {
     if (cap2.audio?.state === "running") cap2.audio.suspend().catch(() => {});
   }
 });
+
+const elementoPantallaCompleta = () => document.fullscreenElement || document.webkitFullscreenElement;
+
+const actualizarControlPantalla = () => {
+  const activo = Boolean(elementoPantallaCompleta());
+  botonPantallaGlobal.classList.toggle("pantalla-completa-activa", activo);
+  botonPantallaGlobal.setAttribute("aria-pressed", String(activo));
+  botonPantallaGlobal.setAttribute("aria-label", activo ? "Salir de pantalla completa" : "Activar pantalla completa");
+};
+
+botonPantallaGlobal.addEventListener("click", async () => {
+  const raiz = document.documentElement;
+  try {
+    if (elementoPantallaCompleta()) {
+      const salir = document.exitFullscreen || document.webkitExitFullscreen;
+      if (salir) await salir.call(document);
+    } else {
+      const entrar = raiz.requestFullscreen || raiz.webkitRequestFullscreen;
+      if (!entrar) {
+        botonPantallaGlobal.setAttribute("aria-label", "Pantalla completa no disponible en este navegador");
+        return;
+      }
+      await entrar.call(raiz);
+    }
+  } catch {
+    botonPantallaGlobal.setAttribute("aria-label", "No se pudo cambiar a pantalla completa");
+  }
+  actualizarControlPantalla();
+});
+
+document.addEventListener("fullscreenchange", actualizarControlPantalla);
+document.addEventListener("webkitfullscreenchange", actualizarControlPantalla);
 document.addEventListener("pointerdown", desbloquearAudioOjosFinal, { once: true });
 nodoCap2.querySelector(".cap2-reintentar").addEventListener("click", () => {
   if (cap2.reintentar) operacionCap2(cap2.reintentar);
