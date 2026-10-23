@@ -1119,8 +1119,9 @@ const cap3 = {
   timerCaminata: 0, timerReposo: 0, timerCuadroCuatro: 0, timerAyudaPresiona: 0, timerAyudasLaterales: 0, timerPresionDoble: 0,
   presionando: false, caminataIniciada: false, caminataCompleta: false,
   tiempoCaminata: 0, inicioPresion: 0, frameCaminata: 0,
-  botonesPresionados: new Set(), cuadroCincoActivo: false
+  botonesPresionados: new Set(), punterosLaterales: new Map(), cuadroCincoActivo: false
 };
+const DURACION_PRESION_DOBLE_CAP3 = 700;
 let precargaCap3 = null;
 const cargarRecursosCap3 = () => {
   if (precargaCap3) return precargaCap3;
@@ -1771,7 +1772,7 @@ const prepararCuadroCincoCap3 = () => {
   nodoCap3.classList.remove("cuadro-cuatro-gris");
   cap3.timerPresionDoble = window.setTimeout(() => {
     if (cap3.botonesPresionados.size === 2) activarCuadroCincoCap3();
-  }, 1200);
+  }, DURACION_PRESION_DOBLE_CAP3);
 };
 
 const volverCuadroCuatroCap3 = () => {
@@ -1788,18 +1789,25 @@ const volverCuadroCuatroCap3 = () => {
 
 const presionarBotonLateralCap3 = (event) => {
   if (cap3.escena !== 3 || cap3.cuadroCincoActivo) return;
+  event.preventDefault();
   ocultarAyudasLateralesCap3();
   const boton = event.currentTarget;
-  cap3.botonesPresionados.add(boton);
-  boton.classList.add("presionando");
-  if (event.pointerType !== "mouse") boton.setPointerCapture?.(event.pointerId);
+  const clavePuntero = event.pointerType === "mouse" ? boton : event.pointerId;
+  cap3.punterosLaterales.set(clavePuntero, boton);
+  cap3.botonesPresionados = new Set(cap3.punterosLaterales.values());
+  botonesLateralesCap3.forEach((control) => {
+    control.classList.toggle("presionando", cap3.botonesPresionados.has(control));
+  });
   prepararCuadroCincoCap3();
 };
 
 const soltarBotonLateralCap3 = (event) => {
   if (event.pointerType === "mouse") return;
-  cap3.botonesPresionados.delete(event.currentTarget);
-  event.currentTarget.classList.remove("presionando");
+  cap3.punterosLaterales.delete(event.pointerId);
+  cap3.botonesPresionados = new Set(cap3.punterosLaterales.values());
+  botonesLateralesCap3.forEach((control) => {
+    control.classList.toggle("presionando", cap3.botonesPresionados.has(control));
+  });
   window.clearTimeout(cap3.timerPresionDoble);
   nodoCap3.classList.add("cuadro-cuatro-gris");
   volverCuadroCuatroCap3();
