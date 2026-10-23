@@ -291,6 +291,7 @@ const terminarChispa = (event) => {
 };
 
 const cerrarPermisoCamara = () => {
+  lienzo.classList.remove("configuracion-inicial");
   permisoCamara.classList.add("saliendo");
   window.setTimeout(() => {
     permisoCamara.hidden = true;
@@ -1046,6 +1047,7 @@ if (revisionGiro) {
 const escenaSolicitada = parametros.get("escena");
 if (escenaSolicitada || parametros.has("capitulo")) {
   permisoCamara.hidden = true;
+  lienzo.classList.remove("configuracion-inicial");
   estadoCamara = "omitida";
 }
 actualizarInicioVertical();

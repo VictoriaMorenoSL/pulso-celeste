@@ -98,6 +98,30 @@ body::after {
 .control-pantalla-global.pantalla-completa-activa .icono-pantalla-abrir { display: none; }
 .control-pantalla-global.pantalla-completa-activa .icono-pantalla-cerrar { display: block; }
 
+.lienzo.configuracion-inicial .control-sonido-global,
+.lienzo.configuracion-inicial .control-pantalla-global {
+  animation: guia-configuracion-inicial 1.35s ease-in-out infinite;
+}
+
+@keyframes guia-configuracion-inicial {
+  0%, 100% {
+    opacity: .36;
+    filter: drop-shadow(0 0 2px rgb(255 255 255 / 8%));
+  }
+  50% {
+    opacity: .88;
+    filter: drop-shadow(0 0 10px rgb(255 255 255 / 52%));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lienzo.configuracion-inicial .control-sonido-global,
+  .lienzo.configuracion-inicial .control-pantalla-global {
+    animation: none;
+    opacity: .78;
+  }
+}
+
 .fondo {
   position: absolute;
   top: 50%;

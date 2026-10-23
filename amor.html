@@ -5,10 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#1b141e">
   <title>Amor</title>
-  <link rel="stylesheet" href="amor.css?v=108">
+  <link rel="stylesheet" href="amor.css?v=109">
 </head>
 <body>
-  <main class="lienzo">
+  <main class="lienzo configuracion-inicial">
     <button class="control-sonido-global sonido-activo" id="controlSonidoGlobal" type="button" aria-pressed="true" aria-label="Desactivar sonido">
       <img src="assets/volumen.svg" alt="" aria-hidden="true">
     </button>
@@ -17,8 +17,8 @@
       <img class="icono-pantalla-cerrar" src="assets/close_fullscreen.svg" alt="" aria-hidden="true">
     </button>
     <section class="permiso-camara" id="permisoCamara" aria-labelledby="tituloPermisoCamara">
-      <p id="tituloPermisoCamara">ACTIVA LA CÁMARA PARA CONTINUAR</p>
-      <p class="permiso-camara-detalle">La usaremos únicamente para reconocer tus parpadeos. El video no se guarda ni se envía.</p>
+      <p id="tituloPermisoCamara">ANTES DE EMPEZAR</p>
+      <p class="permiso-camara-detalle">Para la experiencia completa da permiso para la cámara, enciende el sonido y pon el modo pantalla completa.</p>
       <button id="activarCamara" type="button">ACTIVAR CÁMARA</button>
       <button class="permiso-camara-omitir" id="omitirCamara" type="button">CONTINUAR SIN CÁMARA</button>
     </section>
@@ -240,6 +240,6 @@
     <button id="reiniciarRevision" type="button">Reiniciar</button>
     <button id="simularParpadeo" type="button" hidden>Simular parpadeo</button>
   </aside>
-  <script src="amor.js?v=114"></script>
+  <script src="amor.js?v=115"></script>
 </body>
 </html>
