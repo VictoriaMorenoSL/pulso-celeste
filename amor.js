@@ -10,6 +10,24 @@ const arcoTransicion = document.querySelector(".arco-transicion");
 const sueloTres = document.querySelector(".suelo-tres");
 const parametros = new URLSearchParams(window.location.search);
 const dispositivoTactil = window.matchMedia("(pointer: coarse)").matches;
+const lienzoCompatibilidad = document.createElement("canvas");
+const admiteWebP = lienzoCompatibilidad.toDataURL("image/webp").startsWith("data:image/webp");
+const cargarFuenteAdaptativa = (elemento) => {
+  if (!elemento || elemento.dataset.fuenteCargada === "true") return elemento;
+  const ruta = admiteWebP && elemento.dataset.srcWebp
+    ? elemento.dataset.srcWebp
+    : elemento.dataset.srcFallback;
+  if (!ruta) return elemento;
+  if (elemento instanceof HTMLObjectElement) elemento.data = ruta;
+  else elemento.src = ruta;
+  elemento.dataset.fuenteCargada = "true";
+  return elemento;
+};
+const cargarFuentesAdaptativas = (raiz) => {
+  if (!raiz) return;
+  if (raiz.matches?.("[data-src-webp], [data-src-fallback]")) cargarFuenteAdaptativa(raiz);
+  raiz.querySelectorAll?.("[data-src-webp], [data-src-fallback]").forEach(cargarFuenteAdaptativa);
+};
 // En escritorio la orientación se simula para poder recorrer toda la experiencia
 // sin girar físicamente una pantalla. El parámetro `1` también permite forzarla
 // en navegadores de escritorio que emulan un puntero táctil.
@@ -100,16 +118,15 @@ const DURACION_FRAME_CAMINATA = 137.5;
 const DURACION_ESCENA_TRES = 8800;
 const DURACION_FRAME_CHISPITA = 125;
 const framesCaminata = Array.from({ length: 8 }, (_, indice) =>
-  `assets/character-walk-right/walk-right-${String(indice + 1).padStart(2, "0")}.png`
+  admiteWebP
+    ? `assets/optimized/character-walk-right/walk-right-${String(indice + 1).padStart(2, "0")}.webp`
+    : `assets/character-walk-right/walk-right-${String(indice + 1).padStart(2, "0")}.png`
 );
 const framesChispita = Array.from({ length: 8 }, (_, indice) =>
-  `assets/spark-walk-front/spark-walk-front-${String(indice + 1).padStart(2, "0")}.png`
+  admiteWebP
+    ? `assets/optimized/spark-walk-front/spark-walk-front-${String(indice + 1).padStart(2, "0")}.webp`
+    : `assets/spark-walk-front/spark-walk-front-${String(indice + 1).padStart(2, "0")}.png`
 );
-
-framesChispita.forEach((ruta) => {
-  const frame = new Image();
-  frame.src = ruta;
-});
 
 const detenerAnimacionChispita = (reiniciar = false) => {
   window.cancelAnimationFrame(animacionChispita);
@@ -604,31 +621,37 @@ const esperarImagen = (imagen) => new Promise((resolve, reject) => {
   imagen.addEventListener("load", () => resolve(imagen), { once: true });
   imagen.addEventListener("error", reject, { once: true });
 });
-const imagenesCaminata = framesCaminata.map((ruta) => {
-  const imagen = new Image();
-  imagen.src = ruta;
-  return imagen;
-});
-// El margen transparente cambia entre poses. Se conserva cada PNG intacto y se
-// mide su apoyo para que la alternancia de frames no hunda los pies en el arco.
-const apoyosCaminata = [];
-const recursosRecorrido = (async () => {
-  await Promise.all(imagenesCaminata.map(esperarImagen));
+let imagenesCaminata = [];
+let promesaSecuenciaCaminata = null;
+const apoyosCaminata = [1634, 1633, 1645, 1676, 1689, 1673, 1639, 1636];
+const cargarSecuenciaCaminata = () => {
+  if (promesaSecuenciaCaminata) return promesaSecuenciaCaminata;
+  imagenesCaminata = framesCaminata.map((ruta) => {
+    const imagen = new Image();
+    imagen.decoding = "async";
+    imagen.src = ruta;
+    return imagen;
+  });
+  promesaSecuenciaCaminata = Promise.all(imagenesCaminata.map(esperarImagen));
+  return promesaSecuenciaCaminata;
+};
+
+let recursosRecorrido = null;
+const cargarRecursosRecorrido = () => {
+  if (recursosRecorrido) return recursosRecorrido;
+  cargarFuentesAdaptativas(lienzo.querySelector(".posicion-protagonista"));
+  cargarFuentesAdaptativas(escenaTres);
+  cargarFuentesAdaptativas(escenaCuatro);
+  cargarFuentesAdaptativas(escenaCinco);
+  framesChispita.forEach((ruta) => {
+    const frame = new Image();
+    frame.decoding = "async";
+    frame.src = ruta;
+  });
+  recursosRecorrido = (async () => {
+  await cargarSecuenciaCaminata();
   const lienzoLectura = document.createElement("canvas");
   const contexto = lienzoLectura.getContext("2d", { willReadFrequently: true });
-  for (const imagen of imagenesCaminata) {
-    lienzoLectura.width = imagen.naturalWidth;
-    lienzoLectura.height = imagen.naturalHeight;
-    contexto.drawImage(imagen, 0, 0);
-    const { data } = contexto.getImageData(0, 0, lienzoLectura.width, lienzoLectura.height);
-    let apoyo = lienzoLectura.height - 1;
-    buscarApoyo: for (; apoyo >= 0; apoyo--) {
-      for (let x = 0; x < lienzoLectura.width; x++) {
-        if (data[(apoyo * lienzoLectura.width + x) * 4 + 3] > 32) break buscarApoyo;
-      }
-    }
-    apoyosCaminata.push(apoyo + 1);
-  }
 
   // Importar la forma y sus degradados aprobados, sin editar el SVG de assets.
   const respuesta = await fetch("assets/fondo-dos.svg");
@@ -666,11 +689,13 @@ const recursosRecorrido = (async () => {
     recorrido.perfilSuelo.push(borde);
   }
   lienzoLectura.width = lienzoLectura.height = 0;
-  return true;
-})().catch(() => {
-  lienzo.dataset.errorRecorrido = "No se pudo preparar la caminata. Recarga la página desde el servidor local.";
-  return false;
-});
+    return true;
+  })().catch(() => {
+    lienzo.dataset.errorRecorrido = "No se pudo preparar la caminata. Recarga la página desde el servidor local.";
+    return false;
+  });
+  return recursosRecorrido;
+};
 
 // La curva original usa dos Bézier cúbicas. Se evalúa la misma curva para
 // dibujar la superficie y calcular el apoyo del personaje, incluida su pendiente.
@@ -860,7 +885,7 @@ const sincronizarRecorrido = () => {
 const mostrarEscenaTres = async (directo = false) => {
   if (!escenaDosActiva || escenaTresIniciada || recorrido.estado === "preparando") return;
   recorrido.estado = "preparando";
-  const listo = await recursosRecorrido;
+  const listo = await cargarRecursosRecorrido();
   recorrido.estado = "espera";
   if (!listo) {
     document.querySelector(".mensaje-girar span").textContent = lienzo.dataset.errorRecorrido;
@@ -909,6 +934,7 @@ const cerrarIntro = () => {
   if (intro.disabled || intro.classList.contains("saliendo")) return;
 
   solicitarParallax();
+  cargarRecursosRecorrido();
   intro.disabled = true;
   intro.classList.add("saliendo");
   lienzo.classList.add("mostrar-fondo-dos");
@@ -1025,6 +1051,7 @@ if (escenaSolicitada || parametros.has("capitulo")) {
 actualizarInicioVertical();
 
 if (escenaSolicitada === "3" || escenaSolicitada === "4" || escenaSolicitada === "5") {
+  cargarRecursosRecorrido();
   escenaDosActiva = true;
   escenaDosPreparada = true;
   intro.hidden = true;
@@ -1042,17 +1069,17 @@ if (escenaSolicitada === "3" || escenaSolicitada === "4" || escenaSolicitada ===
 // Capítulo 2 — La conexión. Recursos originales; ninguna llamada externa.
 const RECURSOS_CAP2 = Object.freeze({
   titulo: "assets/Textos-titulos/capituldos.svg?v=2",
-  caminata: "assets/Capitulo-2/cap02_02_caminata.png",
-  pensar: "assets/Capitulo-2/cap02_02.1_empieza-a-pensar.png",
-  pensamiento: "assets/Capitulo-2/cap02_03_pensamiento.png",
-  saludo: "assets/Capitulo-2/cap02_04_burbuja-y-saludo.png",
-  recuerdo: "assets/Capitulo-2/cap02_05_recuerdo.png",
-  mensaje: "assets/Capitulo-2/cap02_08_mensaje.png",
-  telefono: "assets/Capitulo-2/cap02_09_telefono.png",
-  respuesta: "assets/Capitulo-2/cap02_10_escritura.png",
-  escritura: "assets/Capitulo-2/cap02_11_continuacion-escritura.png",
-  azulRecostado: "assets/Capitulo-2/cap02_12_continuacion-escritura.png",
-  naranjaRecostado: "assets/Capitulo-2/cap02_13_continuacion-escritura.png"
+  caminata: admiteWebP ? "assets/optimized/Capitulo-2/cap02_02_caminata.webp" : "assets/Capitulo-2/cap02_02_caminata.png",
+  pensar: admiteWebP ? "assets/optimized/Capitulo-2/cap02_02.1_empieza-a-pensar.webp" : "assets/Capitulo-2/cap02_02.1_empieza-a-pensar.png",
+  pensamiento: admiteWebP ? "assets/optimized/Capitulo-2/cap02_03_pensamiento.webp" : "assets/Capitulo-2/cap02_03_pensamiento.png",
+  saludo: admiteWebP ? "assets/optimized/Capitulo-2/cap02_04_burbuja-y-saludo.webp" : "assets/Capitulo-2/cap02_04_burbuja-y-saludo.png",
+  recuerdo: admiteWebP ? "assets/optimized/Capitulo-2/cap02_05_recuerdo.webp" : "assets/Capitulo-2/cap02_05_recuerdo.png",
+  mensaje: admiteWebP ? "assets/optimized/Capitulo-2/cap02_08_mensaje.webp" : "assets/Capitulo-2/cap02_08_mensaje.png",
+  telefono: admiteWebP ? "assets/optimized/Capitulo-2/cap02_09_telefono.webp" : "assets/Capitulo-2/cap02_09_telefono.png",
+  respuesta: admiteWebP ? "assets/optimized/Capitulo-2/cap02_10_escritura.webp" : "assets/Capitulo-2/cap02_10_escritura.png",
+  escritura: admiteWebP ? "assets/optimized/Capitulo-2/cap02_11_continuacion-escritura.webp" : "assets/Capitulo-2/cap02_11_continuacion-escritura.png",
+  azulRecostado: admiteWebP ? "assets/optimized/Capitulo-2/cap02_12_continuacion-escritura.webp" : "assets/Capitulo-2/cap02_12_continuacion-escritura.png",
+  naranjaRecostado: admiteWebP ? "assets/optimized/Capitulo-2/cap02_13_continuacion-escritura.webp" : "assets/Capitulo-2/cap02_13_continuacion-escritura.png"
 });
 const nodoCap2 = document.querySelector("#capituloDos");
 const botonSonidoGlobal = document.querySelector("#controlSonidoGlobal");
@@ -1075,10 +1102,14 @@ const cuadroCincoCap3 = nodoCap3.querySelector(".cap3-cuadro-cinco");
 const botonesLateralesCap3 = [...nodoCap3.querySelectorAll(".cap3-boton-lateral")];
 const svgCuadroTresCap3 = nodoCap3.querySelector(".cap3-cuadro-tres-svg");
 const FRAMES_AZUL_CAP3 = Array.from({ length: 8 }, (_, indice) =>
-  `assets/character-walk-right/walk-right-${String(indice + 1).padStart(2, "0")}.png`
+  admiteWebP
+    ? `assets/optimized/character-walk-right/walk-right-${String(indice + 1).padStart(2, "0")}.webp`
+    : `assets/character-walk-right/walk-right-${String(indice + 1).padStart(2, "0")}.png`
 );
 const FRAMES_CHISPA_CAP3 = Array.from({ length: 8 }, (_, indice) =>
-  `assets/Capitulo-3/chispa-caminata/frame_${String(indice + 1).padStart(2, "0")}.png`
+  admiteWebP
+    ? `assets/optimized/Capitulo-3/chispa-caminata/frame_${String(indice + 1).padStart(2, "0")}.webp`
+    : `assets/Capitulo-3/chispa-caminata/frame_${String(indice + 1).padStart(2, "0")}.png`
 );
 const cap3 = {
   esperandoGiro: false, activo: false, escena: 0,
@@ -1088,10 +1119,21 @@ const cap3 = {
   tiempoCaminata: 0, inicioPresion: 0, frameCaminata: 0,
   botonesPresionados: new Set(), cuadroCincoActivo: false
 };
-[...FRAMES_AZUL_CAP3, ...FRAMES_CHISPA_CAP3].forEach((ruta) => {
-  const imagen = new Image();
-  imagen.src = ruta;
-});
+let precargaCap3 = null;
+const cargarRecursosCap3 = () => {
+  if (precargaCap3) return precargaCap3;
+  cargarFuentesAdaptativas(nodoCap3);
+  svgCuadroTresCap3.addEventListener("load", () => {
+    if (cap3.caminataCompleta) prepararAnimacionCuadroTres();
+  }, { once: true });
+  precargaCap3 = Promise.all([...FRAMES_AZUL_CAP3, ...FRAMES_CHISPA_CAP3].map((ruta) => {
+    const imagen = new Image();
+    imagen.decoding = "async";
+    imagen.src = ruta;
+    return esperarImagen(imagen);
+  })).catch(() => []);
+  return precargaCap3;
+};
 
 let animacionCuadroTresPreparada = false;
 const prepararAnimacionCuadroTres = () => {
@@ -1417,7 +1459,11 @@ const pintarCaminataCap2 = () => {
 
 const iniciarCaminataCap2 = () => operacionCap2(async () => {
   accionCap2.hidden = true;
-  const recursos = Promise.all([cargarImagenCap2("caminata"), cargarImagenCap2("pensar"), ...imagenesCaminata.map(esperarImagen)]);
+  const recursos = Promise.all([
+    cargarImagenCap2("caminata"),
+    cargarImagenCap2("pensar"),
+    cargarSecuenciaCaminata()
+  ]).then(([fondo, parche]) => [fondo, parche]);
   laminasCap2.forEach((nodo) => nodo.classList.remove("visible"));
   const [[fondo, parche]] = await Promise.all([
     recursos,
@@ -1586,6 +1632,7 @@ const sincronizarCap2 = () => {
 
 const iniciarCapituloTres = (directo = false) => {
   if (cap3.activo || (!directo && (!cap3.esperandoGiro || estaHorizontal() || document.hidden))) return;
+  cargarRecursosCap3();
   cap3.esperandoGiro = false;
   cap3.activo = true;
   cap2.activo = false;

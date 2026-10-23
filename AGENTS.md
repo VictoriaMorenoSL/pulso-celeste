@@ -15,6 +15,7 @@ Continuar una experiencia narrativa interactiva para celular sin alterar los rec
 
 - No redibujar, recolorear, deformar ni sustituir los personajes o fondos aprobados.
 - No modificar los PNG de las secuencias de animación.
+- Las copias WebP de `assets/optimized/` son derivados móviles; conservar los PNG originales como fallback y regenerar ambos grupos de ocho frames cuando cambie una secuencia aprobada.
 - Mantener transparencia, textura, proporciones y orden de los frames.
 - Separar la animación por frames del desplazamiento del contenedor.
 - Conservar las escenas verticales en 1080 × 1920 (9:16) y las horizontales en 1920 × 1080 (16:9).
@@ -46,7 +47,7 @@ Continuar una experiencia narrativa interactiva para celular sin alterar los rec
 - El capítulo 2 está integrado en los mismos `amor.html`, `amor.css` y `amor.js`, dentro de `#capituloDos`, con estilos `cap2-*` y un estado `cap2`.
 - Incluye título, caminata azul hacia la izquierda (frames originales reflejados mediante CSS), seis pulsaciones de `assets/Boton-press.svg` para formar el pensamiento, recuerdos normal/saludo/guiño, disolución, veinte taps de escritura y conversación. Se pausa en vertical física en celular, vertical simulada en computadora o con la pestaña oculta.
 - Los doce PNG de `assets/Capitulo-2/` son composiciones opacas. Las máscaras se calculan en memoria; no modificar ni reemplazar los originales. Saludo y guiño son poses con fundidos, sin brazo ni dedos articulados independientes.
-- Los efectos son sintetizados con Web Audio y tienen silencio; no hay archivos de audio externos.
+- Los efectos combinan Web Audio con archivos locales de `assets/Audios/`; el control global inicia activo y permite silenciarlos.
 - El último plano es `cap02_13_continuacion-escritura.png`. `continuarConversacionCap2()` establece el estado `final`; la rama `cap2.estado === "final"` del manejador de `accionCap2` llama ahora a `prepararCapituloTres()`.
 - El capítulo 3 ya inicia desde el estado final: después del toque pide volver a vertical y muestra una portadilla con `assets/Capitulo-3/fondo-capitulo3.svg` y `assets/Capitulo-3/capitulo3.svg`. La siguiente escena aún no está implementada.
 - Al ampliar el capítulo 3, conservar `prepararCapituloTres()`, `sincronizarCapituloTres()` e `iniciarCapituloTres()`: detienen el reloj anterior, dejan el capítulo 2 inerte y respetan giro físico o simulado. No añadir pantallas vacías visibles.

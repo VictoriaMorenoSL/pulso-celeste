@@ -42,12 +42,17 @@ La cámara frontal se solicita al inicio mediante el botón «Activar cámara» 
 | `index.html` | Entrada raíz para GitHub Pages; conserva parámetros de revisión y abre `amor.html`. |
 | `AGENTS.md` | Reglas de continuidad y conservación de recursos para quien trabaje en Codex. |
 | `assets/` | Fondos y personajes SVG/PNG originales, incluidas capas y recursos que se conservan aunque no se carguen actualmente. |
+| `assets/optimized/` | Copias WebP y SVG optimizadas para la experiencia móvil. El código las usa cuando el navegador admite WebP y conserva los originales como fallback. |
 | `assets/Textos-titulos/` | Títulos SVG originales. El título actual del capítulo 2 utiliza su referencia PNG. |
 | `assets/character-walk-right/` | Ocho frames del azul, spritesheet y notas de animación. Se reutilizan en ambos capítulos. |
 | `assets/spark-walk-front/` | Ocho frames frontales de Chispita, spritesheet y notas. Se usan en el encuentro del capítulo 1. |
 | `assets/Capitulo-2/` | Doce composiciones PNG aprobadas para la secuencia de La cercanía. |
 
 Todos los recursos de ejecución son locales y relativos. El SVG de textura está embebido en CSS como `data:`; no es una dependencia remota. Los números añadidos como parámetros `?v=` en algunas rutas son versiones de caché, no nombres de archivo adicionales. Los audios utilizados están incluidos en `assets/Audios/`; no hay fuentes descargadas, frameworks, credenciales ni configuración de compilación requerida.
+
+### Optimización móvil
+
+La carga está dividida por etapas. La portada inicial no descarga las secuencias completas: los frames del capítulo 1 se preparan después de continuar, las composiciones del capítulo 2 se solicitan según su estado y los recursos del capítulo 3 se cargan al entrar en él. Los PNG originales no se modifican; `amor.js` detecta WebP y selecciona las copias reducidas de `assets/optimized/`, con retorno automático a los originales para navegadores antiguos. Los apoyos de la caminata se conservan con las coordenadas aprobadas y ya no requieren analizar millones de píxeles en un canvas al iniciar.
 
 ## Capítulo 1: escenas, navegación y animaciones
 
