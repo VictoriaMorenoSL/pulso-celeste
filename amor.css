@@ -63,10 +63,12 @@ body::after {
 .control-pantalla-global {
   right: calc(max(14px, env(safe-area-inset-right)) + clamp(38px, 8vw, 46px));
   color: #fefcf6;
+  background: rgb(20 16 27 / 36%);
   opacity: .6;
 }
 
-.control-sonido-global img { display: block; width: 100%; height: 100%; pointer-events: none; }
+.control-sonido-global img,
+.control-pantalla-global img { display: block; width: 100%; height: 100%; pointer-events: none; }
 .control-sonido-global::after {
   position: absolute;
   top: 50%;
@@ -87,23 +89,14 @@ body::after {
 .control-sonido-global:focus-visible,
 .control-pantalla-global:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
 
-.icono-pantalla-completa {
-  position: relative;
-  display: block;
-  width: 100%;
-  height: 100%;
-  border: 1.6px solid currentColor;
-  transition: transform .2s ease;
-}
-
 .control-pantalla-global.pantalla-completa-activa {
-  background: rgb(20 16 27 / 40%);
-  opacity: .82;
+  background: rgb(20 16 27 / 36%);
+  opacity: .6;
 }
 
-.control-pantalla-global.pantalla-completa-activa .icono-pantalla-completa {
-  transform: scale(.72);
-}
+.control-pantalla-global .icono-pantalla-cerrar { display: none; }
+.control-pantalla-global.pantalla-completa-activa .icono-pantalla-abrir { display: none; }
+.control-pantalla-global.pantalla-completa-activa .icono-pantalla-cerrar { display: block; }
 
 .fondo {
   position: absolute;
