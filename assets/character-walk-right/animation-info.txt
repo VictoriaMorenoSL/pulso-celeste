@@ -1,0 +1,33 @@
+ANIMACIÓN: CAMINATA HACIA LA DERECHA
+
+Número de frames: 8
+Orden de reproducción: 01 → 02 → 03 → 04 → 05 → 06 → 07 → 08 → 01
+Dirección: derecha (caminata en su lugar, preparada para reutilizar)
+Duración recomendada de cada frame: 137.5 ms
+Duración del ciclo completo: 1100 ms (1.1 segundos)
+Frecuencia aproximada: 7.27 frames por segundo
+Loop: infinito
+Dimensiones de cada frame: 1578 × 1836 píxeles
+Dimensiones del sprite sheet: 12624 × 1836 píxeles
+Distribución del sprite sheet: 8 columnas, 1 fila, sin separación
+Formato: PNG RGBA con transparencia real
+
+POSES
+01: contacto de pierna A
+02: descenso
+03: cruce de piernas
+04: elevación
+05: contacto de pierna B
+06: descenso opuesto
+07: cruce opuesto
+08: elevación opuesta
+
+ORIGEN Y ALINEACIÓN
+Exportado directamente del render del visualizador corregido actual.
+Las poses se toman en fases 0, 1/8, 2/8, 3/8, 4/8, 5/8, 6/8 y 7/8.
+Se conserva el PNG incrustado, los recortes, pivotes y amplitud corregida de 0.22 radianes.
+Canvas, escala 1:1 y posición base constantes. Se conserva el movimiento vertical sutil.
+No hay desplazamiento horizontal entre frames ni recortes individuales.
+El sprite sheet contiene los mismos PNG en orden de izquierda a derecha.
+Las 8 poses discretizan el ciclo continuo del visualizador; no incluyen su interfaz.
+Para tiempos enteros, alternar 138 y 137 ms mantiene el ciclo en 1100 ms.

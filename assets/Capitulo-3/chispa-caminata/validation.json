@@ -1,0 +1,114 @@
+[
+  {
+    "frame": 1,
+    "file": "frame_01.png",
+    "dimensions": [
+      272,
+      400
+    ],
+    "mode": "RGBA",
+    "alpha_min": 0,
+    "alpha_max": 255,
+    "transparent_pixels": 46025,
+    "partially_transparent_pixels": 62704,
+    "removed_detached_pixels": 1697
+  },
+  {
+    "frame": 2,
+    "file": "frame_02.png",
+    "dimensions": [
+      272,
+      400
+    ],
+    "mode": "RGBA",
+    "alpha_min": 0,
+    "alpha_max": 255,
+    "transparent_pixels": 48299,
+    "partially_transparent_pixels": 60457,
+    "removed_detached_pixels": 2034
+  },
+  {
+    "frame": 3,
+    "file": "frame_03.png",
+    "dimensions": [
+      272,
+      400
+    ],
+    "mode": "RGBA",
+    "alpha_min": 0,
+    "alpha_max": 255,
+    "transparent_pixels": 46745,
+    "partially_transparent_pixels": 61985,
+    "removed_detached_pixels": 2411
+  },
+  {
+    "frame": 4,
+    "file": "frame_04.png",
+    "dimensions": [
+      272,
+      400
+    ],
+    "mode": "RGBA",
+    "alpha_min": 0,
+    "alpha_max": 255,
+    "transparent_pixels": 46053,
+    "partially_transparent_pixels": 62694,
+    "removed_detached_pixels": 3051
+  },
+  {
+    "frame": 5,
+    "file": "frame_05.png",
+    "dimensions": [
+      272,
+      400
+    ],
+    "mode": "RGBA",
+    "alpha_min": 0,
+    "alpha_max": 255,
+    "transparent_pixels": 43491,
+    "partially_transparent_pixels": 65258,
+    "removed_detached_pixels": 2796
+  },
+  {
+    "frame": 6,
+    "file": "frame_06.png",
+    "dimensions": [
+      272,
+      400
+    ],
+    "mode": "RGBA",
+    "alpha_min": 0,
+    "alpha_max": 255,
+    "transparent_pixels": 47048,
+    "partially_transparent_pixels": 61705,
+    "removed_detached_pixels": 2428
+  },
+  {
+    "frame": 7,
+    "file": "frame_07.png",
+    "dimensions": [
+      272,
+      400
+    ],
+    "mode": "RGBA",
+    "alpha_min": 0,
+    "alpha_max": 255,
+    "transparent_pixels": 48746,
+    "partially_transparent_pixels": 60011,
+    "removed_detached_pixels": 2325
+  },
+  {
+    "frame": 8,
+    "file": "frame_08.png",
+    "dimensions": [
+      272,
+      400
+    ],
+    "mode": "RGBA",
+    "alpha_min": 0,
+    "alpha_max": 255,
+    "transparent_pixels": 47102,
+    "partially_transparent_pixels": 61647,
+    "removed_detached_pixels": 2530
+  }
+]

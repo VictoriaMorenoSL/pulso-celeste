@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Pulso Celeste</title>
+  <meta http-equiv="refresh" content="0; url=amor.html">
+</head>
+<body>
+  <p>Abriendo <a href="amor.html">Pulso Celeste</a>…</p>
+  <script>
+    const destino = new URL("amor.html", window.location.href);
+    destino.search = window.location.search;
+    destino.hash = window.location.hash;
+    window.location.replace(destino.href);
+  </script>
+</body>
+</html>

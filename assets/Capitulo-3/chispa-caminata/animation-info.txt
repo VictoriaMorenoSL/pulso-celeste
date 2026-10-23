@@ -1,0 +1,41 @@
+ANIMACIÓN: CAMINATA HACIA LA IZQUIERDA
+
+Número de frames: 8
+Archivos: frame_01.png → frame_08.png
+Orden de reproducción: 01 → 02 → 03 → 04 → 05 → 06 → 07 → 08 → 01
+Dirección: izquierda (el personaje ya está orientado hacia la izquierda)
+Duración recomendada de cada frame: 137.5 ms
+Duración del ciclo completo: 1100 ms (1.1 segundos)
+Frecuencia aproximada: 7.27 frames por segundo
+Loop: infinito
+Dimensiones de cada frame: 272 × 400 píxeles
+Dimensiones del sprite sheet: 2176 × 400 píxeles
+Distribución del sprite sheet: 8 columnas, 1 fila, sin separación
+Formato: PNG RGBA con transparencia alfa real
+
+POSES
+01: contacto de pierna A
+02: descenso
+03: cruce de piernas
+04: elevación
+05: contacto de pierna B
+06: descenso opuesto
+07: cruce opuesto
+08: elevación opuesta
+
+ORIGEN Y ALINEACIÓN
+Todos los frames usan un canvas constante de 272 × 400 píxeles.
+El personaje está centrado horizontalmente y conserva el movimiento vertical sutil del ciclo.
+Usar el mismo origen o pivote en todos los frames; se recomienda centro inferior (0.5, 1.0).
+No aplicar recortes automáticos individuales, porque cambiarían la alineación durante la reproducción.
+Los bordes exteriores son transparentes y ningún frame toca el límite del canvas.
+El sprite sheet contiene los mismos ocho PNG en orden de izquierda a derecha.
+Para tiempos enteros, alternar 138 y 137 ms mantiene el ciclo en 1100 ms.
+
+INSTRUCCIONES PARA CODEX
+Registrar esta secuencia como la animación de caminata hacia la izquierda.
+Reproducir frame_01.png hasta frame_08.png en orden y repetir en bucle mientras el personaje avance hacia la izquierda.
+No voltear horizontalmente estos PNG: el personaje ya mira hacia la izquierda.
+Mantener una posición, escala, origen y dimensiones constantes al cambiar de frame.
+Detener la secuencia y mostrar el frame de reposo correspondiente cuando el personaje deje de caminar.
+Si se usa el sprite sheet criatura_naranja_caminando_preview.png, recortar cada frame con un rectángulo de 272 × 400 píxeles, empezando en x=0 y avanzando 272 píxeles por frame.

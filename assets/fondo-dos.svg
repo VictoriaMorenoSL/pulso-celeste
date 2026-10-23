@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Capa_2" data-name="Capa 2" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 1080 1920">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: url(#Degradado_sin_nombre_661);
+      }
+
+      .cls-2 {
+        fill: url(#Degradado_sin_nombre_664);
+      }
+    </style>
+    <linearGradient id="Degradado_sin_nombre_664" data-name="Degradado sin nombre 664" x1="528.94" y1="55.53" x2="546.64" y2="1502.72" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#1b131e"/>
+      <stop offset=".44" stop-color="#18111b"/>
+      <stop offset=".72" stop-color="#100b12"/>
+      <stop offset=".95" stop-color="#030204"/>
+      <stop offset="1" stop-color="#000"/>
+    </linearGradient>
+    <linearGradient id="Degradado_sin_nombre_661" data-name="Degradado sin nombre 661" x1="538.89" y1="1503.26" x2="532.08" y2="423.7" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#1b131e"/>
+      <stop offset="1" stop-color="#60afea"/>
+    </linearGradient>
+  </defs>
+  <g id="fondo-02">
+    <g id="fondo-02-2" data-name="fondo-02">
+      <rect id="fondo" class="cls-2" width="1080" height="1920"/>
+      <path id="montaña" class="cls-1" d="M0,1500.89s241.43-222.42,561.48-222.42,518.52,159.94,518.52,159.94v481.59H0v-419.11Z"/>
+    </g>
+  </g>
+</svg>

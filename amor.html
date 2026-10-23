@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#1b141e">
+  <title>Amor</title>
+  <link rel="stylesheet" href="amor.css?v=106">
+</head>
+<body>
+  <main class="lienzo">
+    <button class="control-sonido-global sonido-activo" id="controlSonidoGlobal" type="button" aria-pressed="true" aria-label="Desactivar sonido">
+      <img src="assets/volumen.svg" alt="" aria-hidden="true">
+    </button>
+    <section class="permiso-camara" id="permisoCamara" aria-labelledby="tituloPermisoCamara">
+      <p id="tituloPermisoCamara">ACTIVA LA CÁMARA PARA CONTINUAR</p>
+      <p class="permiso-camara-detalle">La usaremos únicamente para reconocer tus parpadeos. El video no se guarda ni se envía.</p>
+      <button id="activarCamara" type="button">ACTIVAR CÁMARA</button>
+      <button class="permiso-camara-omitir" id="omitirCamara" type="button">CONTINUAR SIN CÁMARA</button>
+    </section>
+    <video id="videoCamara" class="video-camara" autoplay muted playsinline aria-hidden="true"></video>
+    <canvas id="analisisCamara" class="video-camara" width="160" height="120" aria-hidden="true"></canvas>
+    <img
+      class="fondo fondo-uno"
+      src="assets/fondo-uno.svg"
+      alt=""
+      aria-hidden="true"
+    >
+    <img
+      class="fondo fondo-dos"
+      src="assets/fondo-dos.svg"
+      alt=""
+      aria-hidden="true"
+    >
+    <div class="posicion-protagonista">
+      <object
+        class="personaje-de-pie"
+        data="assets/de-pie-animado.svg"
+        type="image/svg+xml"
+        aria-label="Personaje de pie sobre la montaña"
+      ></object>
+      <div class="paso-protagonista" aria-hidden="true">
+        <img
+          class="personaje-caminando"
+          src="assets/character-walk-right/walk-right-01.png"
+          alt="Personaje caminando hacia la derecha"
+        >
+      </div>
+    </div>
+    <button
+      id="intro"
+      class="intro"
+      type="button"
+      aria-label="Toca para continuar"
+    >
+      <img
+        class="capitulo"
+        src="assets/Textos-titulos/capitulouno.svg"
+        alt="Capítulo uno"
+      >
+      <span class="continuar">Toca para continuar</span>
+    </button>
+    <p class="mensaje-girar" role="status">
+      <span>Gira tu celular para avanzar</span>
+    </p>
+    <p class="inicio-orientacion" role="status">Coloca tu celular en vertical para comenzar</p>
+    <section class="escena-tres" aria-hidden="true">
+      <img
+        class="fondo-tres"
+        src="assets/fondo-tres.png"
+        alt=""
+        aria-hidden="true"
+      >
+      <img
+        class="montanas-tres"
+        src="assets/fondo-tres.png"
+        alt=""
+        aria-hidden="true"
+      >
+      <img class="suelo-tres" src="assets/fondo-tres.png" alt="" aria-hidden="true">
+      <svg class="arco-transicion" viewBox="0 0 1080 1920" preserveAspectRatio="none" aria-hidden="true"></svg>
+    </section>
+    <section class="escena-cuatro" aria-hidden="true">
+      <img
+        class="fondo-cuatro"
+        src="assets/fondo-cuatro.svg"
+        alt=""
+        aria-hidden="true"
+      >
+      <div
+        class="personaje-espaldas"
+        role="img"
+        aria-label="Personaje visto de espaldas"
+      >
+        <span class="personaje-espaldas-capa brazo-ventana brazo-ventana-izquierda" aria-hidden="true">
+          <img
+            class="personaje-espaldas-capa brazo-espera brazo-espera-izquierdo"
+            src="assets/personaje-espaldas.png"
+            alt=""
+          >
+        </span>
+        <span class="personaje-espaldas-capa brazo-ventana brazo-ventana-derecha" aria-hidden="true">
+          <img
+            class="personaje-espaldas-capa brazo-espera brazo-espera-derecho"
+            src="assets/personaje-espaldas.png"
+            alt=""
+          >
+        </span>
+        <img
+          class="personaje-espaldas-capa personaje-espaldas-cuerpo"
+          src="assets/personaje-espaldas-cuerpo.png?v=3"
+          alt=""
+          aria-hidden="true"
+        >
+      </div>
+      <div class="interaccion-chispa" id="interaccionChispa">
+        <div class="spark-position" aria-hidden="true">
+          <span class="spark-glow"></span>
+          <div class="spark-animation">
+            <img
+              class="chispa"
+              src="assets/spark-walk-front/spark-walk-front-01.png"
+              alt=""
+            >
+          </div>
+        </div>
+        <span class="recorrido-chispa" aria-hidden="true"></span>
+        <button
+          class="control-chispa"
+          id="controlChispa"
+          type="button"
+          aria-label="Mantén presionado y desliza hacia la izquierda para encender la chispa"
+        >
+          <span class="nucleo-control" aria-hidden="true"></span>
+          <span class="texto-control">Presiona y desliza</span>
+        </button>
+      </div>
+    </section>
+    <section class="escena-cinco" aria-hidden="true">
+      <img
+        class="fondo-cinco"
+        src="assets/fondo-cuatro.svg"
+        alt=""
+        aria-hidden="true"
+      >
+      <img
+        class="personaje-close"
+        src="assets/Personaje-close.svg?v=2"
+        alt="Primer plano del personaje azul"
+      >
+      <button class="continuar-capitulo" id="continuarCapituloDos" type="button" disabled aria-label="Parpadea para continuar al capítulo 2">
+        <span id="indicacionParpadeo">PARPADEA PARA CONTINUAR · 0/3</span>
+      </button>
+    </section>
+    <section class="capitulo-dos" id="capituloDos" hidden aria-hidden="true" aria-label="Capítulo 2: La conexión">
+      <div class="cap2-escenario" aria-hidden="true">
+        <img class="cap2-fondo cap2-fondo-base" alt="">
+        <img class="cap2-fondo cap2-fondo-parche" alt="">
+        <span class="cap2-destello-press" id="destelloPressCap2" aria-hidden="true"></span>
+        <div class="cap2-caminante"><div class="cap2-reflejo"><img class="cap2-frames" alt=""></div></div>
+        <div class="cap2-frontal"></div>
+        <div class="cap2-bolitas"></div>
+        <div class="cap2-nube"></div>
+      </div>
+      <img class="cap2-lamina" alt="">
+      <img class="cap2-lamina" alt="">
+      <span class="cap2-calidez" aria-hidden="true"></span>
+      <button class="cap2-accion" id="accionCapituloDos" type="button" aria-label="Comenzar el capítulo 2"></button>
+      <button class="cap2-boton-press" id="botonPressCap2" type="button" hidden aria-label="Presiona para hacer crecer el pensamiento">
+        <img src="assets/Boton-press.svg?v=3" alt="" aria-hidden="true">
+      </button>
+      <div class="cap2-zonas" hidden>
+        <button class="cap2-tecla cap2-tecla-izquierda" type="button" aria-label="Escribir desde el lado izquierdo"><span aria-hidden="true"></span></button>
+        <button class="cap2-tecla cap2-tecla-derecha" type="button" aria-label="Escribir desde el lado derecho"><span aria-hidden="true"></span></button>
+      </div>
+      <output class="cap2-progreso" aria-live="polite"></output>
+      <p class="cap2-leyenda"></p>
+      <p class="cap2-orientacion" role="status">Gira tu celular para continuar</p>
+      <button class="cap2-reintentar" type="button" hidden>Reintentar la carga</button>
+    </section>
+    <section class="capitulo-tres" id="capituloTres" hidden aria-hidden="true" aria-label="Capítulo 3: La cercanía">
+      <div class="cap3-pista">
+        <article class="cap3-panel cap3-portadilla" aria-label="Portadilla del capítulo 3">
+          <img class="cap3-fondo" src="assets/Capitulo-3/fondo-capitulo3.svg" alt="" aria-hidden="true">
+          <span class="cap3-resplandor" aria-hidden="true"></span>
+          <img class="cap3-titulo" src="assets/Capitulo-3/capitulo3.svg?v=2" alt="Capítulo 3. La cercanía">
+          <button class="cap3-deslizar" type="button" aria-label="Desliza o pulsa para ir a la siguiente escena">
+            <span>DESLIZA PARA IR A LA SIGUIENTE ESCENA</span>
+            <span class="cap3-flecha" aria-hidden="true">→</span>
+          </button>
+        </article>
+        <article class="cap3-panel cap3-escena-dos" aria-label="Siguiente escena del capítulo 3">
+          <img src="assets/Capitulo-3/fondo-dos-cap-3.svg" alt="" aria-hidden="true">
+          <img class="cap3-personaje cap3-personaje-azul" src="assets/character-walk-right/walk-right-01.png" alt="El personaje azul sube la montaña desde la izquierda">
+          <img class="cap3-personaje cap3-personaje-chispa" src="assets/Capitulo-3/chispa-caminata/frame_01.png" alt="Chispa sube la montaña desde la derecha">
+          <button class="cap3-longpress" type="button" aria-label="Mantén presionado para que ambos personajes caminen">
+            <img src="assets/Boton-press.svg?v=3" alt="" aria-hidden="true">
+          </button>
+          <span class="cap3-presiona" aria-hidden="true">PRESIONA</span>
+          <div class="cap3-cuadro-tres" aria-hidden="true">
+            <object class="cap3-cuadro-tres-svg" data="assets/Capitulo-3/fondo-tres-cap-3.svg?v=2" type="image/svg+xml" aria-label="Los dos personajes juntos en el tercer cuadro"></object>
+          </div>
+          <div class="cap3-cuadro-cuatro" aria-hidden="true">
+            <img src="assets/Capitulo-3/fondo-cuatro-cap-3.png" alt="Cuarto cuadro del capítulo 3">
+            <span class="cap3-parpado-cuatro cap3-parpado-cuatro-izquierdo" aria-hidden="true"></span>
+            <span class="cap3-parpado-cuatro cap3-parpado-cuatro-derecho" aria-hidden="true"></span>
+            <button class="cap3-boton-lateral cap3-boton-lateral-izquierdo" type="button" aria-label="Presiona el botón izquierdo">
+              <img src="assets/Boton-press.svg?v=3" alt="" aria-hidden="true">
+            </button>
+            <span class="cap3-etiqueta-lateral cap3-etiqueta-lateral-izquierda" aria-hidden="true">PRESIONA</span>
+            <button class="cap3-boton-lateral cap3-boton-lateral-derecho" type="button" aria-label="Presiona el botón derecho">
+              <img src="assets/Boton-press.svg?v=3" alt="" aria-hidden="true">
+            </button>
+            <span class="cap3-etiqueta-lateral cap3-etiqueta-lateral-derecha" aria-hidden="true">PRESIONA</span>
+          </div>
+          <div class="cap3-cuadro-cinco" aria-hidden="true">
+            <img src="assets/Capitulo-3/fondo-cinco-cap-3.svg?v=2" alt="Quinto cuadro del capítulo 3">
+          </div>
+        </article>
+      </div>
+    </section>
+    <span class="cursor-tactil" aria-hidden="true"></span>
+  </main>
+
+  <aside class="revision-giro" hidden aria-label="Simulación de orientación y revisión">
+    <button id="simularGiro" type="button">Girar a horizontal</button>
+    <button id="pausarRevision" type="button" disabled>Pausar</button>
+    <label>Tiempo (s) <input id="tiempoRevision" type="number" min="0" max="8.8" step="0.1" value="0" disabled></label>
+    <button id="reiniciarRevision" type="button">Reiniciar</button>
+    <button id="simularParpadeo" type="button" hidden>Simular parpadeo</button>
+  </aside>
+  <script src="amor.js?v=112"></script>
+</body>
+</html>

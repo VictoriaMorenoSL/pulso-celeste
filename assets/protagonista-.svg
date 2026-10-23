@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Capa_2" data-name="Capa 2" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 212.64 367.16">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #dcb8ff;
+      }
+
+      .cls-2 {
+        fill: #36a9e1;
+      }
+
+      .cls-3 {
+        fill: #fff;
+      }
+
+      .cls-4 {
+        fill: url(#Degradado_sin_nombre_735);
+      }
+
+      .cls-5 {
+        fill: url(#Degradado_sin_nombre_642);
+      }
+
+      .cls-6 {
+        fill: url(#Degradado_sin_nombre_735-3);
+      }
+
+      .cls-7 {
+        fill: url(#Degradado_sin_nombre_735-2);
+      }
+
+      .cls-8 {
+        fill: url(#Degradado_sin_nombre_642-2);
+      }
+    </style>
+    <linearGradient id="Degradado_sin_nombre_642" data-name="Degradado sin nombre 642" x1="162.36" y1="30.81" x2="161.98" y2="84.76" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#c152ff"/>
+      <stop offset="1" stop-color="#36a9e1"/>
+    </linearGradient>
+    <linearGradient id="Degradado_sin_nombre_735" data-name="Degradado sin nombre 735" x1="128.46" y1="537.88" x2="95.4" y2="473.13" gradientTransform="translate(-75.6 -130.79) rotate(-11.02)" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#c152ff"/>
+      <stop offset=".03" stop-color="#b956fd"/>
+      <stop offset=".17" stop-color="#916ff4"/>
+      <stop offset=".33" stop-color="#7084ed"/>
+      <stop offset=".48" stop-color="#5694e8"/>
+      <stop offset=".64" stop-color="#449fe4"/>
+      <stop offset=".81" stop-color="#39a6e1"/>
+      <stop offset="1" stop-color="#36a9e1"/>
+    </linearGradient>
+    <linearGradient id="Degradado_sin_nombre_642-2" data-name="Degradado sin nombre 642" x1="101.96" y1="-56.6" x2="107.31" y2="225.99" xlink:href="#Degradado_sin_nombre_642"/>
+    <linearGradient id="Degradado_sin_nombre_735-2" data-name="Degradado sin nombre 735" x1="160.91" y1="301.75" x2="134.69" y2="240.59" gradientTransform="matrix(1,0,0,1,0,0)" xlink:href="#Degradado_sin_nombre_735"/>
+    <linearGradient id="Degradado_sin_nombre_735-3" data-name="Degradado sin nombre 735" x1="63.01" y1="372.4" x2="34.28" y2="316.11" gradientTransform="matrix(1,0,0,1,0,0)" xlink:href="#Degradado_sin_nombre_735"/>
+  </defs>
+  <g id="monito-caminando">
+    <g>
+      <path id="oreja" class="cls-5" d="M172.31,34.49c-13.6-10.04-29.93,3.6-29.93,3.6,3.94,49.83,38.85,46.75,38.85,46.75,0,0,4.68-40.31-8.92-50.35Z"/>
+      <path id="pierna-inferior-derecha" class="cls-4" d="M114.31,361.06c5.58,9.41,58,5.98,56.07-3.95-1.93-9.93-29.36-7.66-31.34-17.86-.85-4.39-2.06-11.64-3.55-20.58-.76-4.37-3.01-9.31-13.23-7.74s-16.81,2.21-14.67,13.24,4.46,33.05,6.73,36.88Z"/>
+      <path id="pierna-superior-derecha" class="cls-2" d="M135.48,318.75l-27.91,5.43c-2.44-13.48-6.17-42.19-7.15-50.14s24.3-11.2,26.64,0,8.42,44.7,8.42,44.7Z"/>
+      <path id="cuerpo" class="cls-8" d="M0,169.08C0,94.47,49.38,75.97,71,41.21,92.61,6.45,100.93,0,115.55,0c15.71,0,20.72,19.52,26.83,38.1,4.04,12.29,8.57,24.16,17,29.69,6.39,4.2,13.77,9.64,20.97,17.1,16.65,17.24,32.29,45.28,32.29,93.61,0,27.17-19.25,104.59-120.56,104.59-28.65,0-92.08-27.73-92.08-114.01Z"/>
+      <g id="sonrisa">
+        <path class="cls-1" d="M209.54,161.37c-.13.08-12.48,8.31-26.18,3.98-1.32-.42-2.72.31-3.14,1.63-.42,1.32.31,2.72,1.63,3.14,3.31,1.05,6.53,1.47,9.57,1.47,11.76,0,20.38-5.94,20.81-6.33-.03-1.18-.33-4.42-.42-5.42-.72.59-1.25.93-2.26,1.54Z"/>
+      </g>
+      <circle id="ojo" class="cls-1" cx="169.29" cy="131.12" r="17.9"/>
+      <path id="brillo-ojos" class="cls-3" d="M178.49,121.8c-2.03-.09-3.75,1.49-3.83,3.52-.09,2.03,1.49,3.75,3.52,3.83s3.75-1.49,3.83-3.52c.09-2.03-1.49-3.75-3.52-3.83Z"/>
+      <path id="brazo-inferior" class="cls-7" d="M152.31,299.21c-3.76-5.21-14.94-30.86-25.24-55.35l15.6-5.85c7.37,19.13,15.05,38.33,18.37,44.22,7.24,12.89-1.17,27.46-8.73,16.98Z"/>
+      <path id="brazo-superior" class="cls-2" d="M142.6,238.02l-15.6,5.85c-10.42-24.8-9.15-19.53-9.15-19.53l18.47-2.78s-1.39-2.34,6.28,16.46Z"/>
+      <path id="brazo-superior-2" data-name="brazo-superior" class="cls-2" d="M142.6,238.02l-15.6,5.85c-10.42-24.8-9.15-19.53-9.15-19.53l18.47-2.78s-1.39-2.34,6.28,16.46Z"/>
+      <path class="cls-6" d="M44.04,313.38c1.21-2.65,4.97-5.9,7.52-4.79s13.2,4.61,15.59,6.04,3.95,2.63,1.62,7.36-10.63,22.73-10.63,22.73c0,0,22.7,13.4,22.7,18.05s-57.43,6.83-57.43.27c0-3.45,10.6-27.57,20.64-49.66"/>
+      <path class="cls-2" d="M68.76,321.99s15.73-36.95,17.29-41-3.94-8.73-11.21-10.59-10.51-.81-13.18,4.89c-.49,1.04-8.84,18.79-17.62,38.09l24.72,8.61"/>
+    </g>
+  </g>
+</svg>

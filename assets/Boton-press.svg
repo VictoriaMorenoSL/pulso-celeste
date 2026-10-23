@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Capa_2" data-name="Capa 2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1276.78 1276.78">
+  <defs>
+    <style>
+      .cls-1 {
+        opacity: .12;
+      }
+
+      .cls-1, .cls-2 {
+        fill: #fff;
+      }
+
+      .cls-2 {
+        opacity: .3;
+      }
+
+    </style>
+  </defs>
+  <g id="Capa_9" data-name="Capa 9">
+    <g>
+      <circle id="boton-fondo" class="cls-1" cx="638.39" cy="638.39" r="638.39"/>
+      <circle id="boton" class="cls-2" cx="638.39" cy="641.11" r="392.1"/>
+    </g>
+  </g>
+</svg>

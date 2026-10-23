@@ -1,0 +1,25 @@
+CHISPITA: CAMINATA FRONTAL / HACIA CÁMARA
+
+Número de frames: 8
+Orden: 01 → 02 → 03 → 04 → 05 → 06 → 07 → 08 → 01
+Dirección: frontal / hacia cámara, eje horizontal centrado
+Duración recomendada por frame: 125 ms
+Duración aproximada del ciclo: 1000 ms
+Frecuencia: 8 FPS
+Dimensiones de cada frame: 1440 × 1440 px
+Dimensiones del spritesheet: 11520 × 1440 px
+Spritesheet: 8 columnas, 1 fila, sin separación
+Fondo: transparente real, PNG RGBA
+Loop recomendado: infinito
+
+Poses: contacto 1, bajada, paso, subida, contacto opuesto, bajada opuesta, paso opuesto, subida opuesta.
+
+Origen: píxeles de chispa.caminando.png, recortados en cuerpo, brazos y piernas. Sin redibujar el rostro, cambiar colores ni generar texturas.
+El cuerpo y el rostro se transforman juntos sin deformación. La perspectiva de piernas se anima mediante acortamiento y avance alternado; los brazos se balancean en oposición.
+Todos los frames usan el mismo canvas y anclaje inferior central. Se mantiene un rebote de 3 px y escala global uniforme del 97% al 100%.
+
+ACERCAMIENTO Y REPETICIÓN
+El crecimiento progresivo está incluido en los frames y se reinicia al pasar del 08 al 01: hay un pequeño reajuste de escala del 3%. La caminata sí repite sus fases periódicamente.
+Un acercamiento siempre creciente no puede cerrar un loop de tamaño idéntico. Para un loop sin cambio de tamaño al reiniciar, compensar la escala incorporada y aplicar la aproximación al contenedor durante varios ciclos.
+Escala incorporada por frame: 0.970000, 0.974286, 0.978571, 0.982857, 0.987143, 0.991429, 0.995714, 1.000000.
+Compensación opcional: escala de contenedor = escala de aproximación deseada / escala incorporada del frame, con origen inferior central.
