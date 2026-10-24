@@ -60,6 +60,32 @@ audioEscribiendoHola.preservesPitch = true;
 const audioPensamiento = new Audio("assets/Audios/pensamiento.mp3");
 audioPensamiento.preload = "auto";
 audioPensamiento.volume = .7;
+let estadoMusicaListo = false;
+const bandaSonora = new window.PulsoMusica.BandaSonora((datos) => {
+  Object.assign(lienzo.dataset, {
+    musicaDeseada: datos.deseada, musicaActual: datos.actual, musicaEstado: datos.estado,
+    musicaContexto: datos.contexto, musicaDuracion: String(datos.duracion),
+    musicaPosicion: String(datos.segundo), musicaError: datos.error
+  });
+});
+const sincronizarMusica = () => {
+  if (!estadoMusicaListo) return;
+  const capituloUno = !cap2.activo && !cap3.activo && !cap3.esperandoGiro
+    && !cierreEstelar.activo && !cierreEstelar.pendiente;
+  const orientacionPausada = !estaHorizontal() && (cap2.activo
+    || (capituloUno && escenaTresIniciada));
+  bandaSonora.actualizar({
+    pista: window.PulsoMusica.seleccionarAmbiente({
+      cierrePresentado: cierreEstelar.presentado,
+      capituloTres: cap3.activo || cierreEstelar.activo || cierreEstelar.pendiente,
+      esperaTres: cap3.esperandoGiro, capituloDos: cap2.activo, estadoDos: cap2.estado
+    }),
+    pausa: document.hidden || recorrido.pausaRevision || orientacionPausada
+      || Boolean(cap2.error) || Boolean(lienzo.dataset.errorRecorrido),
+    mudo: cap2.silencio,
+    inmediata: document.hidden
+  });
+};
 const orientacionHorizontal = window.matchMedia("(orientation: landscape)");
 let inicioVerticalVisto = !orientacionHorizontal.matches;
 let escenaDosActiva = false;
@@ -320,7 +346,8 @@ const habilitarContinuacionSinCamara = () => {
 };
 
 const reproducirAudioOjosFinal = (reiniciar = false) => {
-  if (cap2.silencio || document.hidden || !lienzo.classList.contains("escena-cinco-activa")) return;
+  if (cap2.silencio || document.hidden || cap2.activo || cap3.activo || cap3.esperandoGiro
+    || cierreEstelar.activo || cierreEstelar.pendiente || !lienzo.classList.contains("escena-cinco-activa")) return;
   audioOjosFinal.volume = .72;
   if (reiniciar) audioOjosFinal.currentTime = 0;
   audioOjosFinal.play().catch(() => { /* El navegador puede requerir otra interacción del usuario. */ });
@@ -364,7 +391,7 @@ const desbloquearAudioOjosFinal = () => {
 };
 
 const reproducirAudioPensamiento = () => {
-  if (cap2.silencio || document.hidden || cap2.estado !== "recuerdo" || cap2.tapsPensamiento < 6) return;
+  if (cap2.silencio || !cap2.activo || document.hidden || cap2.estado !== "recuerdo" || cap2.tapsPensamiento < 6) return;
   audioPensamiento.currentTime = 0;
   audioPensamiento.play().catch(() => { /* La escena continúa aunque el navegador bloquee el audio. */ });
 };
@@ -375,7 +402,7 @@ const detenerAudioPensamiento = () => {
 };
 
 const reproducirAudioEscritura = (reiniciar = false) => {
-  if (cap2.silencio || document.hidden || cap2.estado !== "escritura") return;
+  if (cap2.silencio || !cap2.activo || document.hidden || cap2.estado !== "escritura") return;
   if (reiniciar) audioEscribiendoHola.currentTime = 0;
   audioEscribiendoHola.play().catch(() => { /* Se reintentará con la primera pulsación. */ });
 };
@@ -693,6 +720,7 @@ const cargarRecursosRecorrido = () => {
     return true;
   })().catch(() => {
     lienzo.dataset.errorRecorrido = "No se pudo preparar la caminata. Recarga la página desde el servidor local.";
+    sincronizarMusica();
     return false;
   });
   return recursosRecorrido;
@@ -1032,6 +1060,8 @@ if (revisionGiro) {
     recorrido.pausaRevision = !recorrido.pausaRevision;
     pausa.textContent = recorrido.pausaRevision ? "Reanudar" : "Pausar";
     sincronizarRecorrido();
+    sincronizarCierreEstelar();
+    sincronizarMusica();
   });
   tiempo.addEventListener("input", () => {
     if (!escenaTresIniciada || escenaTresTerminada || !Number.isFinite(tiempo.valueAsNumber)) return;
@@ -1040,6 +1070,7 @@ if (revisionGiro) {
     pausa.textContent = "Reanudar";
     sincronizarRecorrido();
     pintarRecorrido();
+    sincronizarMusica();
   });
   document.querySelector("#reiniciarRevision").addEventListener("click", () => window.location.reload());
 }
@@ -1101,6 +1132,7 @@ const botonLongPressCap3 = nodoCap3.querySelector(".cap3-longpress");
 const cuadroTresCap3 = nodoCap3.querySelector(".cap3-cuadro-tres");
 const cuadroCuatroCap3 = nodoCap3.querySelector(".cap3-cuadro-cuatro");
 const cuadroCincoCap3 = nodoCap3.querySelector(".cap3-cuadro-cinco");
+const nodoCierreEstelar = document.querySelector("#cierreEstelar");
 const botonesLateralesCap3 = [...nodoCap3.querySelectorAll(".cap3-boton-lateral")];
 const svgCuadroTresCap3 = nodoCap3.querySelector(".cap3-cuadro-tres-svg");
 const FRAMES_AZUL_CAP3 = Array.from({ length: 8 }, (_, indice) =>
@@ -1122,9 +1154,49 @@ const cap3 = {
   botonesPresionados: new Set(), punterosLaterales: new Map(), cuadroCincoActivo: false
 };
 const DURACION_PRESION_DOBLE_CAP3 = 700;
+// El quinto cuadro sigue siendo una escena previa, sin partículas. Sostener
+// ambos controles completa el encuentro y abre un escenario distinto.
+const cierreEstelar = {
+  pendiente: false, activo: false, presentado: false, reiniciando: false,
+  recursosLluviaListos: false, lluviaIniciada: false,
+  tiempoAcceso: 0, ultimoAcceso: null, rafAcceso: 0,
+  tiempoEntrada: 0, ultimoEntrada: null, rafEntrada: 0
+};
+const DURACION_ENCUENTRO_CAP3 = 2600;
+let lluviaEstrellasCap3 = null;
+let cargaLluviaEstrellasCap3 = null;
+const prepararLluviaEstrellasCap3 = () => {
+  if (cargaLluviaEstrellasCap3) return cargaLluviaEstrellasCap3;
+  cargaLluviaEstrellasCap3 = import("./assets/efectos/estrellas/lluvia.js")
+    .then(async ({ LluviaEstrellas }) => {
+      if (!lluviaEstrellasCap3) {
+        lluviaEstrellasCap3 = new LluviaEstrellas(
+          document.querySelector("#lluviaEstrellasCap3"),
+          () => cierreEstelar.activo && cierreEstelar.presentado
+            && !nodoCierreEstelar.hidden && !document.hidden
+            && !cierreEstelar.reiniciando && !recorrido.pausaRevision
+        );
+      }
+      await lluviaEstrellasCap3.cargar();
+      cierreEstelar.recursosLluviaListos = true;
+      iniciarLluviaCierreEstelar();
+    }).catch((error) => {
+      cargaLluviaEstrellasCap3 = null;
+      console.warn("No se pudo preparar la lluvia de estrellas; la escena continúa.", error);
+    });
+  return cargaLluviaEstrellasCap3;
+};
+const iniciarLluviaCierreEstelar = () => {
+  if (!cierreEstelar.activo || !cierreEstelar.presentado || cierreEstelar.reiniciando
+    || !cierreEstelar.recursosLluviaListos || cierreEstelar.lluviaIniciada) return;
+  cierreEstelar.lluviaIniciada = true;
+  lluviaEstrellasCap3.redimensionar();
+  lluviaEstrellasCap3.iniciar({ duracion: 5 });
+};
 let precargaCap3 = null;
 const cargarRecursosCap3 = () => {
   if (precargaCap3) return precargaCap3;
+  prepararLluviaEstrellasCap3();
   cargarFuentesAdaptativas(nodoCap3);
   svgCuadroTresCap3.addEventListener("load", () => {
     if (cap3.caminataCompleta) prepararAnimacionCuadroTres();
@@ -1222,6 +1294,28 @@ const cap2 = {
   bolitas: [], recuerdos: [], cache: new Map(), audio: null, silencio: false
 };
 
+let emojisConversacionCap2 = null;
+let cargaEmojisConversacionCap2 = null;
+const prepararEmojisConversacionCap2 = () => {
+  if (cargaEmojisConversacionCap2) return cargaEmojisConversacionCap2;
+  cargaEmojisConversacionCap2 = import("./assets/efectos/emojis/conversacion.js")
+    .then(({ crearEmojisConversacion }) => {
+      if (!emojisConversacionCap2) {
+        emojisConversacionCap2 = crearEmojisConversacion({
+          canvas: document.querySelector("#emojisConversacionCap2"),
+          habilitado: () => ["conversacion", "final"].includes(cap2.estado) && puedeInteractuarCap2(),
+          visible: () => !nodoCap2.hidden && !document.hidden && estaHorizontal(),
+          sonar: () => sonarCap2("emoji")
+        });
+      }
+      return emojisConversacionCap2.cargar();
+    }).catch((error) => {
+      cargaEmojisConversacionCap2 = null;
+      console.warn("No se pudo preparar el efecto de emojis; la conversación continúa.", error);
+    });
+  return cargaEmojisConversacionCap2;
+};
+
 const cargarImagenCap2 = (nombre) => {
   if (!cap2.cache.has(nombre)) {
     const imagen = new Image();
@@ -1251,7 +1345,8 @@ const sonarCap2 = (tipo, ignorarOrientacion = false) => {
   try {
     const ajustes = {
       paso: [105, .09, .009], tecla: [650, .035, .008],
-      glow: [520, .42, .006], puff: [180, .28, .009], mensaje: [784, .55, .007]
+      glow: [520, .42, .006], puff: [180, .28, .009], mensaje: [784, .55, .007],
+      emoji: [1046.5, .26, .006]
     }[tipo];
     const [frecuencia, duracion, volumen] = ajustes;
     const oscilador = audio.createOscillator();
@@ -1259,7 +1354,7 @@ const sonarCap2 = (tipo, ignorarOrientacion = false) => {
     const ahora = audio.currentTime;
     oscilador.type = "sine";
     oscilador.frequency.setValueAtTime(frecuencia, ahora);
-    oscilador.frequency.exponentialRampToValueAtTime(tipo === "glow" ? frecuencia * 1.5 : frecuencia * .65, ahora + duracion);
+    oscilador.frequency.exponentialRampToValueAtTime(["glow", "emoji"].includes(tipo) ? frecuencia * 1.5 : frecuencia * .65, ahora + duracion);
     ganancia.gain.setValueAtTime(0, ahora);
     ganancia.gain.linearRampToValueAtTime(volumen, ahora + .012);
     ganancia.gain.exponentialRampToValueAtTime(.0001, ahora + duracion);
@@ -1275,11 +1370,13 @@ const estadoCap2 = (estado) => {
   cap2.estado = estado;
   cap2.tiempo = 0;
   nodoCap2.dataset.estado = estado;
+  if (estado === "conversacion") prepararEmojisConversacionCap2();
+  emojisConversacionCap2?.sincronizar();
   leyendaCap2.classList.remove("inactividad-visible");
   const ayudas = {
     titulo: "Toca para continuar", caminata: "", pensamiento: "",
     recuerdo: "", disolucion: "", escritura: "",
-    mensaje: "Hola...", conversacion: "Toca para continuar la conversación", final: "Toca para continuar"
+    mensaje: "Hola...", conversacion: "TOCA PARA ENVIAR EMOJIS Y SEGUIR CONVERSANDO", final: "TOCA PARA ENVIAR EMOJIS Y SEGUIR CONVERSANDO"
   };
   leyendaCap2.textContent = ayudas[estado];
   accionCap2.hidden = !["titulo", "recuerdo", "conversacion", "final"].includes(estado);
@@ -1287,8 +1384,9 @@ const estadoCap2 = (estado) => {
   zonasCap2.hidden = estado !== "escritura";
   accionCap2.setAttribute("aria-label", {
     titulo: "Comenzar la caminata del personaje azul", pensamiento: "Hacer crecer el pensamiento",
-    recuerdo: "Acercar el recuerdo", conversacion: "Continuar la conversación", final: "Continuar al capítulo 3"
+    recuerdo: "Acercar el recuerdo", conversacion: "Enviar emojis y seguir conversando", final: "Enviar emojis y continuar al capítulo 3"
   }[estado] || "Continuar");
+  sincronizarMusica();
 };
 
 const mostrarErrorCap2 = (operacion) => {
@@ -1296,6 +1394,7 @@ const mostrarErrorCap2 = (operacion) => {
   cap2.reintentar = operacion;
   leyendaCap2.textContent = "No se pudo cargar una imagen del capítulo";
   nodoCap2.querySelector(".cap2-reintentar").hidden = false;
+  sincronizarMusica();
 };
 
 const operacionCap2 = async (operacion) => {
@@ -1311,6 +1410,8 @@ const operacionCap2 = async (operacion) => {
   } finally {
     cap2.ocupado = false;
     nodoCap2.setAttribute("aria-busy", "false");
+    emojisConversacionCap2?.sincronizar();
+    sincronizarMusica();
   }
 };
 
@@ -1517,6 +1618,8 @@ const crecerPensamientoCap2 = () => {
 };
 
 const iniciarEscrituraCap2 = () => operacionCap2(async () => {
+  // Precargar sin conectar el gesto a la escritura ni bloquear la narrativa.
+  prepararEmojisConversacionCap2();
   await mostrarLaminaCap2("mensaje", "El personaje azul se anima a escribir su primer mensaje");
   cap2.tapsEscritura = 0;
   nodoCap2.dataset.progresoEscritura = "0";
@@ -1622,6 +1725,8 @@ const actualizarCap2 = (ahora) => {
 };
 
 const sincronizarCap2 = () => {
+  sincronizarMusica();
+  emojisConversacionCap2?.sincronizar();
   if (!cap2.activo) return;
   window.cancelAnimationFrame(cap2.raf);
   cap2.ultimoTiempo = null;
@@ -1639,6 +1744,7 @@ const iniciarCapituloTres = (directo = false) => {
   cap3.esperandoGiro = false;
   cap3.activo = true;
   cap2.activo = false;
+  emojisConversacionCap2?.sincronizar();
   window.cancelAnimationFrame(cap2.raf);
   cap2.ultimoTiempo = null;
   detenerAudioEscritura();
@@ -1678,12 +1784,146 @@ const iniciarCapituloTres = (directo = false) => {
   nodoCap2.hidden = true;
   nodoCap2.inert = true;
   nodoCap2.setAttribute("aria-hidden", "true");
+  sincronizarMusica();
 };
 
 const sincronizarCapituloTres = () => {
+  sincronizarCierreEstelar();
+  sincronizarMusica();
   if (!cap3.esperandoGiro || cap3.activo) return;
   if (!estaHorizontal() && !document.hidden) iniciarCapituloTres();
 };
+
+const actualizarEntradaCierreEstelar = (ahora) => {
+  const dt = cierreEstelar.ultimoEntrada === null ? 0 : Math.min(64, ahora - cierreEstelar.ultimoEntrada);
+  cierreEstelar.ultimoEntrada = ahora;
+  cierreEstelar.tiempoEntrada += dt;
+  const tiempo = cierreEstelar.tiempoEntrada;
+  nodoCierreEstelar.style.setProperty("--entrada-cierre", Math.min(1, tiempo / 1100));
+  nodoCierreEstelar.style.setProperty("--mensaje-cierre", limitar((tiempo - 1100) / 700, 0, 1));
+  if (tiempo >= 1100 && !cierreEstelar.presentado) {
+    // No se emite ninguna estrella hasta que el fondo nuevo es opaco y el
+    // escenario anterior queda oculto, incluso durante el fundido de entrada.
+    cierreEstelar.presentado = true;
+    nodoCap3.hidden = true;
+    nodoCap3.setAttribute("aria-hidden", "true");
+    sincronizarMusica();
+    prepararLluviaEstrellasCap3();
+    iniciarLluviaCierreEstelar();
+  }
+  if (tiempo < 1800) cierreEstelar.rafEntrada = requestAnimationFrame(actualizarEntradaCierreEstelar);
+  else {
+    cierreEstelar.rafEntrada = 0;
+    nodoCierreEstelar.inert = false;
+  }
+};
+
+const iniciarCierreEstelar = () => {
+  if (cierreEstelar.activo || cierreEstelar.reiniciando || document.hidden) return;
+  cierreEstelar.pendiente = false;
+  cierreEstelar.activo = true;
+  cap3.activo = false;
+  cap3.escena = 5;
+  nodoCap3.inert = true;
+  nodoCierreEstelar.hidden = false;
+  nodoCierreEstelar.inert = true;
+  nodoCierreEstelar.setAttribute("aria-hidden", "false");
+  nodoCierreEstelar.dataset.estado = "cierreEstelar";
+  lienzo.classList.remove("capitulo-tres-activo");
+  lienzo.classList.add("cierre-estelar-activo");
+  if (revisionGiro) {
+    document.querySelector("#pausarRevision").disabled = false;
+    const giro = document.querySelector("#simularGiro");
+    giro.disabled = true;
+    giro.textContent = "Final vertical";
+  }
+  sincronizarCierreEstelar();
+};
+
+const prepararCierreEstelar = () => {
+  if (cierreEstelar.activo || cierreEstelar.pendiente || cierreEstelar.reiniciando) return;
+  cierreEstelar.pendiente = true;
+  window.cancelAnimationFrame(cierreEstelar.rafAcceso);
+  window.clearTimeout(cap3.timerPresionDoble);
+  window.clearTimeout(cap3.timerCuadroCuatro);
+  ocultarAyudasLateralesCap3();
+  cap3.punterosLaterales.clear();
+  cap3.botonesPresionados.clear();
+  botonesLateralesCap3.forEach((boton) => { boton.disabled = true; });
+  prepararLluviaEstrellasCap3();
+  sincronizarCierreEstelar();
+};
+
+const actualizarAccesoCierreEstelar = (ahora) => {
+  if (!cap3.cuadroCincoActivo || cap3.botonesPresionados.size < 2) return;
+  const dt = cierreEstelar.ultimoAcceso === null ? 0 : Math.min(64, ahora - cierreEstelar.ultimoAcceso);
+  cierreEstelar.ultimoAcceso = ahora;
+  cierreEstelar.tiempoAcceso += dt;
+  if (cierreEstelar.tiempoAcceso >= DURACION_ENCUENTRO_CAP3) prepararCierreEstelar();
+  else cierreEstelar.rafAcceso = requestAnimationFrame(actualizarAccesoCierreEstelar);
+};
+
+const sincronizarCierreEstelar = () => {
+  cancelAnimationFrame(cierreEstelar.rafAcceso);
+  cancelAnimationFrame(cierreEstelar.rafEntrada);
+  cierreEstelar.ultimoAcceso = null;
+  cierreEstelar.ultimoEntrada = null;
+  if (cierreEstelar.reiniciando) return;
+  if (cierreEstelar.pendiente) {
+    if (!document.hidden) iniciarCierreEstelar();
+    return;
+  }
+  if (cierreEstelar.activo) {
+    const pausado = document.hidden || recorrido.pausaRevision;
+    nodoCierreEstelar.classList.toggle("en-pausa", pausado);
+    nodoCierreEstelar.dataset.pausa = String(pausado);
+    lluviaEstrellasCap3?.sincronizar();
+    if (!pausado && cierreEstelar.tiempoEntrada < 1800) {
+      cierreEstelar.rafEntrada = requestAnimationFrame(actualizarEntradaCierreEstelar);
+    }
+  } else if (cap3.cuadroCincoActivo && cap3.botonesPresionados.size === 2
+    && !document.hidden && !recorrido.pausaRevision) {
+    cierreEstelar.rafAcceso = requestAnimationFrame(actualizarAccesoCierreEstelar);
+  }
+};
+
+const limpiarCierreEstelar = () => {
+  cierreEstelar.reiniciando = true;
+  cierreEstelar.activo = false;
+  cierreEstelar.pendiente = false;
+  cancelAnimationFrame(cierreEstelar.rafAcceso);
+  cancelAnimationFrame(cierreEstelar.rafEntrada);
+  cierreEstelar.rafAcceso = cierreEstelar.rafEntrada = 0;
+  lluviaEstrellasCap3?.destruir();
+  for (const [clave, timer] of Object.entries(cap3)) {
+    if (clave.startsWith("timer")) window.clearTimeout(timer);
+  }
+  cap3.punterosLaterales.clear();
+  cap3.botonesPresionados.clear();
+};
+
+const reiniciarExperiencia = (event) => {
+  event.preventDefault();
+  if (cierreEstelar.reiniciando) return;
+  limpiarCierreEstelar();
+  bandaSonora.destruir();
+  emojisConversacionCap2?.destruir();
+  cap2.activo = false;
+  cap3.activo = false;
+  window.cancelAnimationFrame(cap2.raf);
+  window.cancelAnimationFrame(animacionCaminata);
+  detenerAnimacionChispita();
+  detenerLecturaCamara(true);
+  detenerParallax();
+  detenerAudioOjosFinal();
+  detenerAudioEscritura();
+  detenerAudioPensamiento();
+  cap2.audio?.close().catch(() => {});
+  nodoCierreEstelar.dataset.estado = "reiniciando";
+  // Navegar sin parámetros reconstruye todos los estados desde la introducción.
+  window.location.assign("amor.html");
+};
+document.querySelector("#reiniciarExperiencia").addEventListener("click", reiniciarExperiencia);
 
 const ocultarAyudaPresionaCap3 = () => {
   window.clearTimeout(cap3.timerAyudaPresiona);
@@ -1712,6 +1952,15 @@ const mostrarEscenaDosCap3 = () => {
   programarAyudaPresionaCap3();
 };
 
+const mostrarCuadroCuatroCap3 = () => {
+  cap3.escena = 3;
+  nodoCap3.classList.add("mostrar-cuadro-cuatro");
+  cuadroTresCap3.setAttribute("aria-hidden", "true");
+  cuadroCuatroCap3.setAttribute("aria-hidden", "false");
+  nodoCap3.querySelector(".cap3-escena-dos").setAttribute("aria-label", "Cuarto cuadro del capítulo 3");
+  programarAyudasLateralesCap3();
+};
+
 const completarCaminataCap3 = () => {
   if (cap3.caminataCompleta) return;
   cap3.caminataCompleta = true;
@@ -1730,14 +1979,7 @@ const completarCaminataCap3 = () => {
   personajeAzulCap3.src = FRAMES_AZUL_CAP3[0];
   personajeChispaCap3.src = FRAMES_CHISPA_CAP3[0];
   window.clearTimeout(cap3.timerCuadroCuatro);
-  cap3.timerCuadroCuatro = window.setTimeout(() => {
-    cap3.escena = 3;
-    nodoCap3.classList.add("mostrar-cuadro-cuatro");
-    cuadroTresCap3.setAttribute("aria-hidden", "true");
-    cuadroCuatroCap3.setAttribute("aria-hidden", "false");
-    nodoCap3.querySelector(".cap3-escena-dos").setAttribute("aria-label", "Cuarto cuadro del capítulo 3");
-    programarAyudasLateralesCap3();
-  }, 3000);
+  cap3.timerCuadroCuatro = window.setTimeout(mostrarCuadroCuatroCap3, 3000);
 };
 
 const ocultarAyudasLateralesCap3 = () => {
@@ -1764,6 +2006,8 @@ const activarCuadroCincoCap3 = () => {
   cuadroCuatroCap3.setAttribute("aria-hidden", "true");
   cuadroCincoCap3.setAttribute("aria-hidden", "false");
   nodoCap3.querySelector(".cap3-escena-dos").setAttribute("aria-label", "Quinto cuadro del capítulo 3");
+  cierreEstelar.tiempoAcceso = 0;
+  sincronizarCierreEstelar();
 };
 
 const prepararCuadroCincoCap3 = () => {
@@ -1777,7 +2021,10 @@ const prepararCuadroCincoCap3 = () => {
 
 const volverCuadroCuatroCap3 = () => {
   window.clearTimeout(cap3.timerPresionDoble);
+  if (cierreEstelar.activo || cierreEstelar.pendiente) return;
   if (!cap3.cuadroCincoActivo) return;
+  cancelAnimationFrame(cierreEstelar.rafAcceso);
+  cierreEstelar.tiempoAcceso = 0;
   cap3.cuadroCincoActivo = false;
   cap3.escena = 3;
   nodoCap3.classList.remove("mostrar-cuadro-cinco");
@@ -1802,6 +2049,7 @@ const presionarBotonLateralCap3 = (event) => {
 };
 
 const soltarBotonLateralCap3 = (event) => {
+  if (cierreEstelar.activo || cierreEstelar.pendiente) return;
   if (event.pointerType === "mouse") return;
   cap3.punterosLaterales.delete(event.pointerId);
   cap3.botonesPresionados = new Set(cap3.punterosLaterales.values());
@@ -1911,6 +2159,7 @@ const prepararCapituloTres = () => {
   if (!cap2.activo || cap2.estado !== "final" || cap3.esperandoGiro || cap3.activo) return;
   cap3.esperandoGiro = true;
   cap2.activo = false;
+  emojisConversacionCap2?.sincronizar();
   window.cancelAnimationFrame(cap2.raf);
   cap2.ultimoTiempo = null;
   nodoCap2.dataset.estado = "espera-cap3";
@@ -1925,6 +2174,9 @@ const prepararCapituloTres = () => {
 
 const iniciarCapituloDos = async () => {
   if (cap2.activo) return;
+  // El respaldo de salida puede adelantarse al final del archivo de parpadeos.
+  // Ese efecto pertenece al capítulo 1 y no debe continuar en el capítulo 2.
+  detenerAudioOjosFinal();
   const transicionLenta = lienzo.classList.contains("transicion-capitulo-dos");
   if (transicionLenta) {
     window.setTimeout(() => {
@@ -1932,7 +2184,6 @@ const iniciarCapituloDos = async () => {
       escenaCinco.classList.remove("esperando-parpadeos");
     }, 3000);
   } else {
-    detenerAudioOjosFinal();
     lienzo.classList.remove("escena-cinco-activa", "parpadeo-detectado");
     escenaCinco.classList.remove("esperando-parpadeos");
   }
@@ -1962,6 +2213,7 @@ const iniciarCapituloDos = async () => {
   nodoCap2.classList.add("visible");
   leyendaCap2.textContent = "Preparando el capítulo...";
   accionCap2.hidden = true;
+  sincronizarMusica();
   await operacionCap2(async () => {
     await mostrarLaminaCap2("titulo", "Capítulo 2. La conexión");
     estadoCap2("titulo");
@@ -1980,9 +2232,10 @@ botonPressCap2.addEventListener("click", () => {
   parpadearFondoCap2();
   crecerPensamientoCap2();
 });
-accionCap2.addEventListener("click", () => {
+accionCap2.addEventListener("click", (event) => {
   if (!puedeInteractuarCap2()) return;
   desbloquearAudioCap2();
+  if (["conversacion", "final"].includes(cap2.estado)) emojisConversacionCap2?.tocar(event);
   if (cap2.estado === "titulo") iniciarCaminataCap2();
   else if (cap2.estado === "final") prepararCapituloTres();
   else if (cap2.estado === "recuerdo") {
@@ -2012,6 +2265,8 @@ botonSonidoGlobal.addEventListener("click", () => {
     if (parpadeosDetectados >= 3) completarSalidaParpadeo?.();
     if (cap2.audio?.state === "running") cap2.audio.suspend().catch(() => {});
   }
+  sincronizarMusica();
+  if (activo) bandaSonora.desbloquear();
 });
 
 const elementoPantallaCompleta = () => document.fullscreenElement || document.webkitFullscreenElement;
@@ -2055,11 +2310,57 @@ window.addEventListener("resize", () => {
   sincronizarCapituloTres();
   if (cap2.activo && cap2.estado === "caminata") pintarCaminataCap2();
 });
-if (parametros.get("capitulo") === "2") iniciarCapituloDos();
+// No se consume ni bloquea ningún gesto narrativo. También admite teclado.
+const desbloquearBandaSonora = (event) => {
+  if (!event.isTrusted || (event.type === "keydown" && !["Enter", " "].includes(event.key))) return;
+  bandaSonora.desbloquear();
+};
+["pointerup", "touchend", "click", "keydown"].forEach((tipo) => {
+  document.addEventListener(tipo, desbloquearBandaSonora, { capture: true, passive: true });
+});
+document.addEventListener("visibilitychange", () => {
+  sincronizarMusica();
+  if (!document.hidden && bandaSonora.desbloqueada) bandaSonora.desbloquear();
+});
+window.addEventListener("pagehide", (event) => {
+  if (event.persisted) bandaSonora.suspenderPagina();
+  else {
+    bandaSonora.destruir();
+    limpiarCierreEstelar();
+  }
+});
+window.addEventListener("pageshow", (event) => {
+  if (event.persisted) { sincronizarMusica(); bandaSonora.reanudarPagina(); }
+});
+estadoMusicaListo = true;
+sincronizarMusica();
+if (parametros.get("capitulo") === "2") {
+  iniciarCapituloDos().then(async () => {
+    // Acceso de desarrollo local: ejecuta la conversación real y su navegación.
+    if (["localhost", "127.0.0.1", "[::1]"].includes(location.hostname)
+      && parametros.get("desarrollo") === "1"
+      && parametros.get("escenaCap2") === "conversacion") {
+      await prepararEmojisConversacionCap2();
+      cap2.conversacion = 0;
+      await continuarConversacionCap2();
+    }
+  });
+}
 else if (parametros.get("capitulo") === "3") {
   iniciarCapituloTres(true);
-  if (parametros.get("cuadro") === "3") {
+  if (["localhost", "127.0.0.1", "[::1]"].includes(location.hostname)
+    && parametros.get("desarrollo") === "1" && parametros.get("escenaCap3") === "cierreEstelar") {
+    // Solo en desarrollo: acceso al mismo cierre vertical de la narrativa.
+    prepararCierreEstelar();
+  } else if (parametros.get("cuadro") === "3") {
     mostrarEscenaDosCap3();
     completarCaminataCap3();
+  } else if (["localhost", "127.0.0.1", "[::1]"].includes(location.hostname)
+    && parametros.get("desarrollo") === "1" && parametros.get("cuadro") === "4") {
+    // Revisión local del final: conserva los dos controles reales y su umbral.
+    mostrarEscenaDosCap3();
+    completarCaminataCap3();
+    window.clearTimeout(cap3.timerCuadroCuatro);
+    mostrarCuadroCuatroCap3();
   }
 }

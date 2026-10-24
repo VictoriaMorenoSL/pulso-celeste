@@ -7,7 +7,8 @@
   <meta name="color-scheme" content="only light">
   <meta name="supported-color-schemes" content="light">
   <title>Amor</title>
-  <link rel="stylesheet" href="amor.css?v=112">
+  <link rel="stylesheet" href="amor.css?v=118">
+  <link rel="stylesheet" href="assets/efectos/emojis/cascadas.css">
 </head>
 <body>
   <main class="lienzo configuracion-inicial">
@@ -178,6 +179,7 @@
       <img class="cap2-lamina" alt="">
       <img class="cap2-lamina" alt="">
       <span class="cap2-calidez" aria-hidden="true"></span>
+      <canvas class="emojis-cascada cap2-emojis" id="emojisConversacionCap2" aria-hidden="true"></canvas>
       <button class="cap2-accion" id="accionCapituloDos" type="button" aria-label="Comenzar el capítulo 2"></button>
       <button class="cap2-boton-press" id="botonPressCap2" type="button" hidden aria-label="Presiona para hacer crecer el pensamiento">
         <img src="assets/Boton-press.svg?v=3" alt="" aria-hidden="true">
@@ -232,6 +234,20 @@
         </article>
       </div>
     </section>
+    <section class="cierre-estelar" id="cierreEstelar" hidden aria-hidden="true" aria-labelledby="tituloCierreEstelar">
+      <img class="cierre-estelar-fondo" src="assets/Capitulo-3/fondo-cierre-estelar.svg" alt="" aria-hidden="true">
+      <canvas class="cierre-estelar-lluvia" id="lluviaEstrellasCap3" aria-hidden="true"></canvas>
+      <div class="cierre-estelar-mensaje">
+        <h1 id="tituloCierreEstelar"><img src="assets/titulo-pulso-celeste.svg" alt="Pulso Celeste"></h1>
+        <p class="cierre-estelar-dedicatoria">Hay encuentros que no se apagan.</p>
+      </div>
+      <div class="cierre-estelar-creditos" aria-label="Créditos">
+        <p class="cierre-estelar-firma">CREADO POR</p>
+        <p>Valeria Victoria Moreno San Luis</p>
+        <p>Ximena Esperanza Zuzuarregui Pozas</p>
+      </div>
+      <a class="cierre-estelar-volver" id="reiniciarExperiencia" href="amor.html">VOLVER A INICIAR <span aria-hidden="true">↻</span></a>
+    </section>
     <span class="cursor-tactil" aria-hidden="true"></span>
   </main>
 
@@ -242,6 +258,7 @@
     <button id="reiniciarRevision" type="button">Reiniciar</button>
     <button id="simularParpadeo" type="button" hidden>Simular parpadeo</button>
   </aside>
-  <script src="amor.js?v=117"></script>
+  <script src="assets/audio/banda-sonora.js?v=1"></script>
+  <script src="amor.js?v=125"></script>
 </body>
 </html>

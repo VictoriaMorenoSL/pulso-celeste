@@ -1,0 +1,13 @@
+/* Capa de composición: el fondo pertenece siempre a la escena narrativa. */
+.emojis-cascada {
+  position: absolute;
+  inset: 0;
+  z-index: 35;
+  width: 100%;
+  height: 100%;
+  display: block;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  pointer-events: none;
+}

@@ -1,0 +1,15 @@
+PULSO CELESTE — SONIDOS ORIGINALES (propuesta)
+===============================================
+Cuatro efectos sonoros generados originalmente para este proyecto.
+Formato: MP3 estéreo a 44.1 kHz / 128 kbps, compatible con navegadores modernos.
+
+cap02_pulso_suave.mp3 — 8 s, latidos suaves repetitivos. Bucle sugerido antes del «Hola...».
+mensaje_hola_enviado.mp3 — 2.4 s, melodía de campanitas al enviar el «Hola...».
+emojis_destello.mp3 — 1.45 s, chispita musical para cada ráfaga de emojis.
+lluvia_estrellas_5s.mp3 — 5 s, brillo de estrellas para el cierre vertical.
+
+Uso sugerido: copiar estos MP3 a pulso-celeste/assets/Audios/; enlazar rutas relativas;
+respetar botón de silencio y detener audio al abandonar cada escena.
+Estos cuatro archivos son EFECTOS, no música instrumental completa.
+Las pistas de música ambiental de los capítulos se deben elegir por separado.
+La generación fue sintética, por lo que conviene escuchar los sonidos para aprobar el estilo.

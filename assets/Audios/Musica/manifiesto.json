@@ -1,0 +1,49 @@
+{
+  "estado": "maquetas instrumentales sintetizadas pendientes de aprobación",
+  "originales": true,
+  "procedencia": "Composición y síntesis aditiva propias; sin muestras, descargas ni obras ajenas.",
+  "frecuencia_muestreo": 44100,
+  "semilla": 2301026,
+  "pistas": [
+    {
+      "archivo": "cap01_primer_encuentro.mp3",
+      "duracion_pcm_segundos": 50.526316,
+      "bpm": 76,
+      "compases": 16,
+      "rms_dbfs": -18.42,
+      "pico_dbfs": -4.82,
+      "bytes": 1213753,
+      "sha256": "c89ec4a637dab3f65795b878d98102c6c6038e4675212d8b039c1e52886cbd4a"
+    },
+    {
+      "archivo": "cap02_pulso.mp3",
+      "duracion_pcm_segundos": 48.0,
+      "bpm": 80,
+      "compases": 16,
+      "rms_dbfs": -18.42,
+      "pico_dbfs": -4.24,
+      "bytes": 1152940,
+      "sha256": "b6345f36bc54a402938929926aaebacda52a8b63672ad2aba8d138a129fda3d8"
+    },
+    {
+      "archivo": "cap02_despues_del_hola.mp3",
+      "duracion_pcm_segundos": 68.571429,
+      "bpm": 84,
+      "compases": 24,
+      "rms_dbfs": -18.42,
+      "pico_dbfs": -5.43,
+      "bytes": 1646341,
+      "sha256": "a75429ff85e6ff226d4795681055f0de7812a4784fb1e6aba5454e86656c42c2"
+    },
+    {
+      "archivo": "final_amor_creciente.mp3",
+      "duracion_pcm_segundos": 75.789474,
+      "bpm": 76,
+      "compases": 24,
+      "rms_dbfs": -18.42,
+      "pico_dbfs": -4.16,
+      "bytes": 1820003,
+      "sha256": "e33677f5c951c02ede04556d807c34e9b2d06095e34f97914a0fcb1cf1445579"
+    }
+  ]
+}

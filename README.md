@@ -121,11 +121,113 @@ El capítulo 3 está integrado en `#capituloTres`. Después del capítulo 2 soli
 
 La segunda escena usa `fondo-dos-cap-3.svg`. El personaje azul y Chispita suben la montaña mediante secuencias PNG independientes. La caminata avanza únicamente mientras se mantiene presionado `Boton-press`; si se suelta, conserva el progreso y la escena pasa a blanco y negro. La ayuda «PRESIONA» aparece solo después de un periodo sin movimiento.
 
-Al completar la caminata aparece `fondo-tres-cap-3.svg`, seguido automáticamente por `fondo-cuatro-cap-3.png`. En este cuadro se muestran dos controles laterales multitáctiles. Ambos deben permanecer presionados simultáneamente durante 1,2 segundos para revelar `fondo-cinco-cap-3.svg`; al perder una presión se regresa al cuadro anterior en blanco y negro. En computadora se conserva la revisión simulada y en celular debe validarse el comportamiento multitáctil real.
+Al completar la caminata aparece `fondo-tres-cap-3.svg`, seguido automáticamente por `fondo-cuatro-cap-3.png`. En este cuadro se muestran dos controles laterales multitáctiles. Ambos deben permanecer presionados simultáneamente durante 700 ms para revelar `fondo-cinco-cap-3.svg`; al perder una presión se regresa al cuadro anterior en blanco y negro. En computadora se conserva la revisión simulada y en celular debe validarse el comportamiento multitáctil real.
 
 Todos los recursos del capítulo permanecen dentro de `assets/Capitulo-3/`. El acceso `amor.html?capitulo=3` abre directamente su portada para revisión.
 
+### Cierre vertical independiente
+
+El quinto cuadro de Chispita girando se conserva sin estrellas. Las dos manos
+simultáneas lo revelan a los 700 ms; sostenerlas otros 2600 ms completa el
+encuentro y abre directamente `cierreEstelar` (`cap3.escena === 5`). Soltar antes
+conserva el regreso al cuarto cuadro. En escritorio se mantiene la simulación
+existente: un click en cada mano representa ambas presiones.
+
+El cierre utiliza `#cierreEstelar`, hermano de `#capituloTres`, con composición
+**vertical 1080 × 1920 (9:16)** y fondo propio
+`assets/Capitulo-3/fondo-cierre-estelar.svg`, de cielo azul/celeste, luz cálida y
+horizonte suave. No solicita ni depende de girar el dispositivo; mantiene su
+proporción vertical incluso en una ventana horizontal.
+
+El fondo entra en 1100 ms. Solo cuando es opaco se oculta el capítulo anterior,
+se activa la música final y se inicia la lluvia: nunca hay estrellas sobre
+Chispita, ni siquiera durante la transición. La lluvia utiliza exclusivamente
+`assets/lluvia-estrellas.png`, sin modificarlo, con partículas laterales/diagonales
+hacia abajo e izquierda, tamaño fijo y profundidad por tamaño/opacidad/velocidad.
+Dura **5 segundos activos**, incluidos 1,5 s de desvanecimiento; al terminar
+vacía las partículas y detiene su reloj. Pestaña oculta y pausa de revisión
+conservan el tiempo pendiente, sin repetir la lluvia al reanudar.
+
+El título carga desde **`assets/titulo-pulso-celeste.svg`**, conservando sus
+colores y proporciones. Los créditos visibles son **Valeria Victoria Moreno San
+Luis** y **Ximena Esperanza Zuzuarregui Pozas**. «Volver a iniciar» destruye el
+motor de estrellas y el contexto musical, detiene efectos/relojes/sensores y
+navega a `amor.html` sin parámetros para reconstruir la experiencia desde cero.
+El silencio global se conserva durante el cierre; no se pausa la música por giro.
+
+La entrada principal y la prueba de música son `amor.html`, mediante su narrativa
+real. Accesos opcionales de desarrollo local:
+
+- `amor.html?capitulo=3&desarrollo=1&cuadro=4&revisarGiro=1`: dos manos reales.
+- `amor.html?capitulo=3&desarrollo=1&escenaCap3=cierreEstelar&revisarGiro=1`: cierre vertical real.
+
+Los atajos solo operan en localhost/127.0.0.1/::1. La barra de revisión muestra
+«Final vertical» y conserva la pausa y el reinicio. Las reglas de giro de los
+capítulos anteriores permanecen intactas. La validación física multitáctil y
+Safari/iOS y Chrome/Android sigue pendiente.
+
 ## Accesos para revisión
+
+### Emojis en la conversación del capítulo 2
+
+El efecto usa los estados `conversacion` y `final`, desde la primera respuesta
+naranja hasta el último plano recostado. No se activa en caminata, pensamiento
+ni en los veinte taps de escritura inicial. `espera-cap3` es la espera de giro
+para entrar al siguiente capítulo: la conversación ya ha concluido y no captura
+nuevas pulsaciones; las partículas que queden terminan su desvanecimiento.
+
+Cada tap en el área narrativa crea inmediatamente una ráfaga de dos PNG y
+avanza una sola vez la conversación. No hay umbral, long press ni emisión por
+mantener el contacto. El manejador de click narrativo es el único que ejecuta
+ambas acciones; los botones de audio, orientación y las otras interacciones
+quedan fuera. La instrucción es «TOCA PARA ENVIAR EMOJIS Y SEGUIR CONVERSANDO»,
+con la misma clase y tipografía de las indicaciones existentes.
+
+Las partículas se conservan sobre los cambios de plano hasta extinguirse; las
+ráfagas pueden superponerse con el máximo existente de ocho partículas. El giro
+y la pestaña oculta conservan la pausa del capítulo. La animación, los tamaños,
+el sonido y las imágenes aprobadas permanecen intactos.
+
+Las cinco emociones se alternan sin controles visibles: enamoramiento, sonrisas,
+risa, alegría y sonrojo. Cada partícula conserva su textura hasta desaparecer.
+El perfil `delicado` adapta la proyección existente de `cascadas` a 18–28 píxeles
+CSS iniciales, con crecimiento máximo de 1,5 y profundidad/desenfoque suaves.
+Se conservan los recortes y PNG originales y la fórmula base de proyección; el
+motor original sin este perfil sigue disponible. El sonido `emoji` usa el mismo
+AudioContext y control global de silencio, sin cambiar los MP3 narrativos.
+
+Acceso directo **solo de desarrollo local**:
+`amor.html?capitulo=2&desarrollo=1&escenaCap2=conversacion&revisarGiro=1`.
+Funciona únicamente en localhost/127.0.0.1/::1 y abre el estado real, con sus taps,
+planos posteriores y enlace al capítulo 3. En producción se entra por la narrativa
+normal; los emojis no requieren parámetros de prueba. El acceso anterior
+`probarEmojis=1` y la demostración sobre el capítulo 1 se retiraron.
+
+Recursos recuperados de
+`/Users/ximenazuzuarregui/Documents/Proyecto_Amor/emojis-capitulo2/`:
+
+- `cascadas.js`: se extrajeron el recorte en memoria, la creación aleatoria de
+  partículas, la proyección, el desenfoque y la composición. Sus fórmulas se
+  conservan en `assets/efectos/emojis/cascadas.js`.
+- `cascadas.html` y `cascadas.css`: revisados como referencia; su interfaz y sus
+  fondos no se incorporan a la experiencia.
+- Los cinco PNG de `cascadas/` se copiaron sin cambios a `assets/emojis-cascadas/`:
+  `Cascada de sonrisas flotantes.png`,
+  `Cascada flotante de emojis risueños.png`, `cascadas.png`,
+  `cascadasonrojo22.png` y `casccada3.png`.
+
+`assets/efectos/emojis/conversacion.js` conecta la capa con `amor.js`;
+el manejador narrativo de `accionCapituloDos` llama a `tocar()` una vez por tap.
+`long-press.js` se conserva como utilidad, pero no se importa en la conversación.
+El canvas usa alfa real, sin relleno ni cuadrícula. Mantiene la proporción de las
+texturas y adapta su espacio de proyección al área disponible, con 1080 unidades
+en el lado corto. Se cachean las texturas y el blur se precalcula. Las ráfagas
+finitas eliminan las partículas vencidas y detienen `requestAnimationFrame` cuando
+la capa queda vacía. El giro y la visibilidad respetan la pausa del capítulo.
+La lluvia de estrellas es independiente y se activa solo en el final del capítulo 3.
+
+La revisión a tamaño móvil en navegador no sustituye la validación de fluidez,
+taps y multitáctil en iOS/Android físicos.
 
 Abrir estas rutas en el mismo servidor:
 
@@ -150,6 +252,32 @@ La revisión del navegador comprueba el flujo de inicio vertical, giro por cambi
 Resultado de esta revisión: sintaxis JavaScript y pruebas de lógica correctas; 40 rutas únicas responden HTTP 200, incluido el HTML y los recursos declarados; recorrido de ambos capítulos completado en el navegador a 390 × 844 y 844 × 390 px, sin errores ni advertencias en la consola revisada. La pulsación sostenida de activación y el arrastre llevaron Chispita a progreso 1; el capítulo 2 completó sus seis taps de pensamiento, veinte de escritura, planos finales y regreso al título. Se comprobó el bloqueo de interacción al volver a vertical y su reanudación en horizontal. Se verificó el estado del botón de silencio; no se evaluó auditivamente el volumen real del dispositivo.
 
 **Pendiente de validación real:** Safari/iOS y Chrome/Android en teléfono físico, giros y permisos de sensores, paralaje físico, zonas seguras, tacto/multitáctil, volumen y desbloqueo de audio. Los movimientos articulados mencionados arriba requieren recursos adicionales y no se reportan como terminados.
+
+## Banda sonora original — maquetas para aprobación
+
+Las cuatro pistas MP3 físicas están en `assets/Audios/Musica/`. Son composiciones
+originales sintetizadas y provisionales, pendientes de escucha y aprobación;
+no se presentan como una producción cinematográfica definitiva. Se pueden
+escuchar por separado en `desarrollo/musica.html`, sin cambiar el diseño de la
+experiencia. Su procedencia, duraciones y regeneración están documentadas en
+`assets/Audios/Musica/README.md` y `manifiesto.json`.
+
+El controlador `assets/audio/banda-sonora.js` se carga antes de `amor.js`, requiere
+un gesto real para desbloquear Web Audio y mantiene una sola fuente ambiental.
+El primer encuentro acompaña el capítulo 1; el estado `pensamiento` inicia el
+pulso; el tap 20 envía «Hola...» y `estadoCap2("mensaje")` cambia a la melodía
+romántica. Esta continúa durante conversación y capítulo 3. La pista final se
+activa exclusivamente cuando `cierreEstelar.presentado` confirma que el fondo
+independiente está visible. Nunca se activa en Chispita girando.
+
+Los cambios de pista hacen fundidos secuenciales. Silencio, pausa, giro, errores,
+pestaña oculta y BFCache conservan un estado coherente sin fuentes duplicadas.
+Una pausa de orientación conserva la posición musical; un giro sin pausa ni
+cambio narrativo conserva la reproducción. Los efectos existentes siguen con sus
+archivos y sistema originales. Los nuevos MP3 suman 5,8 MB, usan rutas relativas,
+no están ignorados y se pueden compartir por GitHub. No hay dependencias nuevas
+para ejecutar el sitio. Las herramientas opcionales de autoría viven en
+`scripts/generar_musica.py`; las pruebas usan `node --test tests/banda-sonora.test.cjs`.
 
 ## Compartir esta versión
 

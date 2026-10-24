@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1920" viewBox="0 0 1080 1920" fill="none">
+  <defs>
+    <linearGradient id="cielo" x1="300" y1="0" x2="650" y2="1920" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#243650"/><stop offset=".37" stop-color="#4e4968"/><stop offset=".72" stop-color="#996f83"/><stop offset="1" stop-color="#dba38e"/>
+    </linearGradient>
+    <radialGradient id="aurora"><stop stop-color="#ffcea4" stop-opacity=".42"/><stop offset="1" stop-color="#f8b7b6" stop-opacity="0"/></radialGradient>
+    <radialGradient id="azul"><stop stop-color="#8ec4dd" stop-opacity=".24"/><stop offset="1" stop-color="#8ec4dd" stop-opacity="0"/></radialGradient>
+    <radialGradient id="luz"><stop stop-color="#fff1d2" stop-opacity=".8"/><stop offset=".12" stop-color="#ffcc91" stop-opacity=".23"/><stop offset="1" stop-color="#ffc88f" stop-opacity="0"/></radialGradient>
+    <filter id="textura" x="0" y="0" width="100%" height="100%"><feTurbulence baseFrequency=".64" numOctaves="3" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/></filter>
+  </defs>
+  <path fill="url(#cielo)" d="M0 0h1080v1920H0z"/>
+  <ellipse cx="950" cy="1120" rx="750" ry="1040" fill="url(#aurora)"/>
+  <ellipse cx="40" cy="190" rx="800" ry="690" fill="url(#azul)"/>
+  <path d="M0 1630C310 1570 575 1720 1080 1500V1920H0Z" fill="#cda29e" fill-opacity=".24"/>
+  <path d="M0 1740C350 1620 660 1810 1080 1635V1920H0Z" fill="#76566b" fill-opacity=".58"/>
+  <path d="M0 1840C440 1700 715 1890 1080 1780V1920H0Z" fill="#46354f" fill-opacity=".72"/>
+  <g fill="#fff1db">
+    <circle cx="132" cy="195" r="2" opacity=".55"/><circle cx="370" cy="106" r="1.8" opacity=".5"/>
+    <circle cx="716" cy="242" r="1.8" opacity=".4"/><circle cx="969" cy="120" r="2" opacity=".6"/>
+    <circle cx="198" cy="454" r="1.6" opacity=".3"/><circle cx="866" cy="560" r="1.8" opacity=".5"/>
+    <circle cx="90" cy="972" r="1.7" opacity=".3"/><circle cx="939" cy="1030" r="2" opacity=".4"/>
+    <circle cx="286" cy="1510" r="1.7" opacity=".3"/>
+  </g>
+  <circle cx="608" cy="426" r="170" fill="url(#luz)"/>
+  <circle cx="682" cy="393" r="120" fill="url(#luz)" opacity=".6"/>
+  <path d="m608 410 3.5 12.5 12.5 3.5-12.5 3.5-3.5 12.5-3.5-12.5-12.5-3.5 12.5-3.5Z" fill="#ffe0ad"/>
+  <path d="m682 382 2.5 8.5 8.5 2.5-8.5 2.5-2.5 8.5-2.5-8.5-8.5-2.5 8.5-2.5Z" fill="#c7e9fa"/>
+  <path fill="#fff" opacity=".027" filter="url(#textura)" d="M0 0h1080v1920H0z"/>
+</svg>

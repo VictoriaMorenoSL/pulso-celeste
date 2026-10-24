@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Pulso Celeste — Escucha de las cuatro maquetas</title>
+  <style>
+    body { max-width: 760px; margin: 32px auto; padding: 0 20px; font: 16px/1.5 system-ui, sans-serif; color: #292335; background: #fcf8f4; }
+    h1 { font-size: 26px; } h2 { font-size: 19px; margin-bottom: 5px; }
+    section { margin: 30px 0; } audio { display: block; width: 100%; margin: 12px 0; }
+    button, a { font-size: 14px; } button { padding: 8px 15px; cursor: pointer; }
+    output { display: block; min-height: 24px; } small { color: #655d6b; }
+  </style>
+</head>
+<body>
+  <h1>Pulso Celeste — Banda sonora</h1>
+  <p><strong>Cuatro maquetas originales sintetizadas, pendientes de tu aprobación.</strong>
+    No son grabaciones instrumentales ni una producción cinematográfica definitiva.
+    Comparten un motivo en re mayor y si menor. No contienen muestras ni música de terceros.</p>
+  <p>Esta página sirve únicamente para escuchar los archivos físicos. La experiencia conserva su diseño.</p>
+  <output id="resultado" aria-live="polite">Elige una pista. Solo se reproduce una a la vez.</output>
+  <section>
+    <h2>1. Primer encuentro</h2>
+    <small>Piano suave, curiosidad y armonía cálida · capítulo 1.</small>
+    <audio id="encuentro" controls preload="metadata" src="../assets/Audios/Musica/cap01_primer_encuentro.mp3"></audio>
+    <button type="button" data-audio="encuentro">Escuchar pista 1</button>
+    <a download href="../assets/Audios/Musica/cap01_primer_encuentro.mp3">Descargar MP3</a>
+  </section>
+  <section>
+    <h2>2. El pulso</h2>
+    <small>Pulso afinado y armonías suaves · pensamientos y escritura, hasta enviar «Hola...».</small>
+    <audio id="pulso" controls preload="metadata" src="../assets/Audios/Musica/cap02_pulso.mp3"></audio>
+    <button type="button" data-audio="pulso">Escuchar pista 2</button>
+    <a download href="../assets/Audios/Musica/cap02_pulso.mp3">Descargar MP3</a>
+  </section>
+  <section>
+    <h2>3. Después del «Hola...»</h2>
+    <small>Melodía luminosa, arpegios y campanas suaves · envío, conversación y capítulo 3 previo al cierre.</small>
+    <audio id="hola" controls preload="metadata" src="../assets/Audios/Musica/cap02_despues_del_hola.mp3"></audio>
+    <button type="button" data-audio="hola">Escuchar pista 3</button>
+    <a download href="../assets/Audios/Musica/cap02_despues_del_hola.mp3">Descargar MP3</a>
+  </section>
+  <section>
+    <h2>4. El amor empieza a crecer</h2>
+    <small>Piano, cuerdas sintetizadas y crecimiento por frases · exclusivamente en el cierre estelar independiente.</small>
+    <audio id="final" controls preload="metadata" src="../assets/Audios/Musica/final_amor_creciente.mp3"></audio>
+    <button type="button" data-audio="final">Escuchar pista 4</button>
+    <a download href="../assets/Audios/Musica/final_amor_creciente.mp3">Descargar MP3</a>
+  </section>
+  <p><a href="../amor.html">Abrir la experiencia desde el principio</a></p>
+  <script>
+    const audios = [...document.querySelectorAll("audio")];
+    const resultado = document.querySelector("#resultado");
+    audios.forEach((audio) => {
+      audio.addEventListener("play", () => {
+        audios.forEach((otro) => { if (otro !== audio) otro.pause(); });
+        resultado.textContent = `Reproduciendo: ${audio.parentElement.querySelector("h2").textContent}`;
+      });
+      audio.addEventListener("error", () => { resultado.textContent = `No se pudo cargar ${audio.getAttribute("src")}`; });
+    });
+    document.querySelectorAll("[data-audio]").forEach((boton) => {
+      boton.addEventListener("click", () => {
+        const audio = document.getElementById(boton.dataset.audio);
+        audios.forEach((otro) => { if (otro !== audio) otro.pause(); });
+        audio.play().catch(() => { resultado.textContent = "Pulsa reproducir en el control de audio para continuar."; });
+      });
+    });
+    document.addEventListener("visibilitychange", () => { if (document.hidden) audios.forEach((audio) => audio.pause()); });
+  </script>
+</body>
+</html>
