@@ -29,8 +29,8 @@ function entorno() {
     close() { this.state = "closed"; return Promise.resolve(); }
     decodeAudioData() { return Promise.resolve({ duration: 60, length: 2646000 }); }
     createGain() {
-      const gain = { value: 0, cancelScheduledValues() {},
-        setValueAtTime(v) { this.value = v; }, linearRampToValueAtTime(v) { this.value = v; } };
+      const gain = { value: 0, rampas: [], cancelScheduledValues() {},
+        setValueAtTime(v) { this.value = v; }, linearRampToValueAtTime(v, t) { this.value = v; this.rampas.push([v, t]); } };
       return { gain, connect() {}, disconnect() {} };
     }
     createBufferSource() {
@@ -50,91 +50,98 @@ function entorno() {
   vm.createContext(ctx);
   vm.runInContext(codigo, ctx);
   const banda = new ctx.window.PulsoMusica.BandaSonora((e) => estados.push(e));
-  return { banda, estados, fuentes, seleccionar: ctx.window.PulsoMusica.seleccionarAmbiente,
+  return { banda, estados, fuentes,
     vivas: () => vivas, maximo: () => maximo, peticiones: () => peticiones, fallar: (v) => { falla = v; } };
 }
 
-test("selección narrativa: pulso hasta el envío; final solo con el cierre presentado", () => {
-  const { seleccionar } = entorno();
-  assert.equal(seleccionar({}), "encuentro");
-  for (const estadoDos of ["pensamiento", "recuerdo", "disolucion", "escritura"]) {
-    assert.equal(seleccionar({ capituloDos: true, estadoDos }), "pulso");
-  }
-  for (const estadoDos of ["mensaje", "conversacion", "final"]) {
-    assert.equal(seleccionar({ capituloDos: true, estadoDos }), "hola");
-  }
-  assert.equal(seleccionar({ esperaTres: true }), "hola");
-  assert.equal(seleccionar({ capituloTres: true, cierrePresentado: false }), "hola");
-  assert.equal(seleccionar({ capituloTres: true, cierrePresentado: true }), "final");
+test("solo fondo usa la ruta solicitada, volumen independiente de 12 % y entrada de 1,5 s", () => {
+  const c = { window: {}, Object }; vm.createContext(c); vm.runInContext(codigo, c);
+  const pistas = c.window.PulsoMusica.PISTAS;
+  assert.deepEqual(Object.keys(pistas), ["fondo"]);
+  assert.equal(pistas.fondo.archivo, "assets/Audios/fondo.mp3");
+  assert(fs.statSync(pistas.fondo.archivo).size > 100000);
+  assert.equal(pistas.fondo.volumen, .12);
+  assert.equal(c.window.PulsoMusica.BACKGROUND_MUSIC_VOLUME, .12);
+  assert.equal(c.window.PulsoMusica.BACKGROUND_FADE_IN_SECONDS, 1.5);
+  assert.equal(c.window.PulsoMusica.seleccionarAmbiente, undefined);
 });
 
-test("sin autoplay; un solo ambiente incluso si se cambian estados rápidamente", async () => {
+test("sin autoplay; los cambios narrativos no reinician la fuente ni su bucle", async () => {
   const e = entorno(), b = e.banda;
-  b.actualizar({ pista: "encuentro" });
+  b.actualizar({ pista: "fondo" }); await esperar();
+  assert.equal(e.peticiones(), 0); assert.equal(e.vivas(), 0);
+  b.desbloquear(); await esperar();
+  const actual = b.actual;
+  assert.equal(actual.id, "fondo"); assert.equal(actual.fuente.loop, true);
+  assert(actual.ganancia.gain.rampas.some(([v, t]) => v === .12 && t === 1.5));
+  b.contexto.currentTime = 22.75;
+  for (let i = 0; i < 25; ++i) {
+    b.actualizar({ pista: "fondo" }); b.desbloquear();
+  }
   await esperar();
-  assert.equal(e.peticiones(), 0);
-  assert.equal(e.vivas(), 0);
-  b.desbloquear();
-  await esperar();
-  assert.equal(b.actual.id, "encuentro");
-  b.actualizar({ pista: "pulso" });
-  b.actualizar({ pista: "hola" });
-  await esperar();
-  assert.equal(b.actual.id, "hola");
-  assert.equal(e.vivas(), 1);
-  assert.equal(e.maximo(), 1);
-  const cantidad = e.fuentes.length;
-  b.actualizar({ pista: "hola" });
-  b.desbloquear();
-  await esperar();
-  assert.equal(e.fuentes.length, cantidad);
-  assert.equal(b.cache.size, 1);
-  b.destruir();
-  assert.equal(e.vivas(), 0);
+  assert.equal(b.actual, actual); assert.equal(e.fuentes.length, 1);
+  assert.equal(e.peticiones(), 1); assert.equal(e.estados.at(-1).segundo, 22.75);
+  assert.equal(e.estados.at(-1).fuente, 1);
+  b.destruir(); assert.equal(e.vivas(), 0);
 });
 
-test("pausa/orientación/silencio conservan posición; BFCache y cierre no dejan loops", async () => {
+test("pausa, silencio y BFCache conservan la posición de fondo sin duplicaciones", async () => {
   const e = entorno(), b = e.banda;
-  b.actualizar({ pista: "hola" }); b.desbloquear(); await esperar();
+  b.actualizar({ pista: "fondo" }); b.desbloquear(); await esperar();
   b.contexto.currentTime = 17.25;
-  b.actualizar({ pista: "hola", pausa: true, inmediata: true });
-  await esperar();
-  assert.equal(e.vivas(), 0);
-  assert.equal(b.posicion.segundo, 17.25);
-  b.actualizar({ pista: "hola" }); await esperar();
-  assert.equal(b.actual.offset, 17.25);
-  b.actualizar({ pista: "hola", mudo: true }); await esperar();
-  assert.equal(e.vivas(), 0);
-  assert.equal(b.estado, "silencio");
-  b.actualizar({ pista: "hola" }); b.desbloquear(); await esperar();
-  assert.equal(e.vivas(), 1);
+  b.actualizar({ pista: "fondo", pausa: true, inmediata: true }); await esperar();
+  assert.equal(e.vivas(), 0); assert.equal(b.posicion.segundo, 17.25);
+  b.actualizar({ pista: "fondo" }); await esperar(); assert.equal(b.actual.offset, 17.25);
+  b.actualizar({ pista: "fondo", mudo: true }); await esperar();
+  assert.equal(e.vivas(), 0); assert.equal(b.estado, "silencio");
+  b.actualizar({ pista: "fondo" }); b.desbloquear(); await esperar();
+  assert.equal(b.actual.offset, 17.25); assert.equal(e.vivas(), 1);
   b.suspenderPagina(); await esperar(); assert.equal(e.vivas(), 0);
   b.reanudarPagina(); await esperar(); assert.equal(e.vivas(), 1);
-  b.destruir(); await esperar(); assert.equal(e.vivas(), 0);
-  b.desbloquear(); await esperar(); assert.equal(e.vivas(), 0);
-  assert.equal(e.maximo(), 1);
+  assert.equal(b.actual.offset, 17.25);
+  b.destruir(); b.destruir(); b.desbloquear(); await esperar();
+  assert.equal(e.vivas(), 0); assert.equal(e.maximo(), 1);
 });
 
-test("un fallo de carga detiene la música anterior y permite reintentar con un gesto", async () => {
+test("fondo vuelve al comienzo en bucle y conserva el offset al pausar tras una vuelta", async () => {
   const e = entorno(), b = e.banda;
-  b.actualizar({ pista: "pulso" }); b.desbloquear(); await esperar();
-  e.fallar(true); b.actualizar({ pista: "hola" }); await esperar();
-  assert.equal(e.vivas(), 0);
-  assert.equal(b.estado, "error");
+  b.actualizar({ pista: "fondo" }); b.desbloquear(); await esperar();
+  b.contexto.currentTime = 62.25;
+  b.actualizar({ pista: "fondo", pausa: true, inmediata: true }); await esperar();
+  assert.equal(b.posicion.segundo, 2.25);
+  b.actualizar({ pista: "fondo" }); await esperar();
+  assert.equal(b.actual.offset, 2.25); assert.equal(b.actual.fuente.loop, true);
+  assert.equal(e.maximo(), 1); b.destruir();
+});
+
+test("un fallo permite reintentar fondo con otro gesto, sin cargar músicas anteriores", async () => {
+  const e = entorno(), b = e.banda;
+  e.fallar(true); b.actualizar({ pista: "fondo" }); b.desbloquear(); await esperar();
+  assert.equal(e.vivas(), 0); assert.equal(b.estado, "error");
   e.fallar(false); b.desbloquear(); await esperar();
-  assert.equal(b.actual.id, "hola");
-  assert.equal(e.maximo(), 1);
-  b.destruir();
+  assert.equal(b.actual.id, "fondo"); assert.equal(e.maximo(), 1); b.destruir();
+});
+
+test("una interrupción del contexto reanuda la misma fuente", async () => {
+  const e = entorno(), b = e.banda;
+  b.actualizar({ pista: "fondo" }); b.desbloquear(); await esperar();
+  const fuente = b.actual.fuente;
+  b.contexto.state = "suspended"; b.desbloquear(); await esperar();
+  assert.equal(b.actual.fuente, fuente); assert.equal(e.fuentes.length, 1); b.destruir();
 });
 
 test("el evento real de envío ocurre una vez en el tap 20, sin esperar temporizadores", () => {
   const app = fs.readFileSync("amor.js", "utf8");
   const desde = app.indexOf("const escribirCap2 ="), hasta = app.indexOf("const continuarConversacionCap2 =");
-  let envios = 0, efectosDetenidos = 0;
+  let envios = 0, efectosDetenidos = 0, confirmaciones = 0, transiciones = 0;
   const control = { textContent: "", classList: { add() {}, remove() {} } };
   const ctx = { Math, cap2: { estado: "escritura", tiempo: 0, tapsEscritura: 0 },
     puedeInteractuarCap2: () => true, desbloquearAudioCap2() {}, reproducirAudioEscritura() {},
     leyendaCap2: control, progresoCap2: control, ajustarLatidoEscritura() {}, sonarCap2() {},
+    sincronizarEfectosNarrativos() {}, efectosNarrativos: { disparar(id) {
+      if (id === "enviar") ++confirmaciones;
+      else { assert.equal(id, "hola"); ++transiciones; }
+    } },
     nodoCap2: { dataset: {}, querySelector: () => control, style: { setProperty() {} } },
     window: { setTimeout() {} }, mostrarLaminaCap2: () => Promise.resolve(), mostrarErrorCap2() {},
     detenerAudioEscritura: () => { ++efectosDetenidos; },
@@ -144,10 +151,14 @@ test("el evento real de envío ocurre una vez en el tap 20, sin esperar temporiz
   for (let i = 0; i < 19; ++i) ctx.escribir("izquierda");
   assert.equal(ctx.cap2.estado, "escritura");
   assert.equal(envios, 0);
+  assert.equal(confirmaciones, 0);
+  assert.equal(transiciones, 0);
   ctx.escribir("derecha");
   assert.equal(ctx.cap2.estado, "mensaje");
   ctx.escribir("derecha");
   assert.equal(envios, 1);
+  assert.equal(confirmaciones, 1);
+  assert.equal(transiciones, 1);
   assert.equal(efectosDetenidos, 1);
 });
 
@@ -157,6 +168,7 @@ test("el efecto de parpadeos termina al entrar al capítulo 2 incluso con salida
   for (const salidaLenta of [true, false]) {
     let paradas = 0;
     const ctx = { cap2: { activo: false }, detenerAudioOjosFinal() { ++paradas; },
+      efectosNarrativos: { detener() {} },
       lienzo: { classList: { contains: () => salidaLenta, remove() {} } },
       escenaCinco: { classList: { remove() {} } }, window: { setTimeout() {} } };
     vm.createContext(ctx);

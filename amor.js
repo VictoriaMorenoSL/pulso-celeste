@@ -61,11 +61,27 @@ const audioPensamiento = new Audio("assets/Audios/pensamiento.mp3");
 audioPensamiento.preload = "auto";
 audioPensamiento.volume = .7;
 let estadoMusicaListo = false;
+const efectosNarrativos = new window.PulsoEfectos.EfectosNarrativos();
+const sincronizarEfectosNarrativos = () => {
+  if (!estadoMusicaListo) return;
+  const capituloUno = !cap2.activo && !cap3.activo && !cap3.esperandoGiro
+    && !cierreEstelar.activo && !cierreEstelar.pendiente;
+  efectosNarrativos.actualizar({
+    mudo: cap2.silencio,
+    pausa: document.hidden || recorrido.pausaRevision || Boolean(cap2.error)
+      || Boolean(lienzo.dataset.errorRecorrido)
+      || (!estaHorizontal() && (cap2.activo || (capituloUno && escenaTresIniciada))),
+    girando: cap3.activo && cap3.cuadroCincoActivo && cap3.botonesPresionados.size === 2
+      && !cierreEstelar.activo && !cierreEstelar.pendiente,
+    tiempoGiro: cierreEstelar.tiempoAcceso / 1000
+  });
+};
 const bandaSonora = new window.PulsoMusica.BandaSonora((datos) => {
   Object.assign(lienzo.dataset, {
     musicaDeseada: datos.deseada, musicaActual: datos.actual, musicaEstado: datos.estado,
     musicaContexto: datos.contexto, musicaDuracion: String(datos.duracion),
-    musicaPosicion: String(datos.segundo), musicaError: datos.error
+    musicaPosicion: String(datos.segundo), musicaFuente: String(datos.fuente), musicaError: datos.error,
+    musicaArchivo: datos.archivo, musicaVolumen: String(datos.volumen)
   });
 });
 const sincronizarMusica = () => {
@@ -75,11 +91,7 @@ const sincronizarMusica = () => {
   const orientacionPausada = !estaHorizontal() && (cap2.activo
     || (capituloUno && escenaTresIniciada));
   bandaSonora.actualizar({
-    pista: window.PulsoMusica.seleccionarAmbiente({
-      cierrePresentado: cierreEstelar.presentado,
-      capituloTres: cap3.activo || cierreEstelar.activo || cierreEstelar.pendiente,
-      esperaTres: cap3.esperandoGiro, capituloDos: cap2.activo, estadoDos: cap2.estado
-    }),
+    pista: "fondo",
     pausa: document.hidden || recorrido.pausaRevision || orientacionPausada
       || Boolean(cap2.error) || Boolean(lienzo.dataset.errorRecorrido),
     mudo: cap2.silencio,
@@ -1095,7 +1107,8 @@ if (escenaSolicitada === "3" || escenaSolicitada === "4" || escenaSolicitada ===
     mostrarEscenaCuatro();
   } else {
     mostrarEscenaCuatro();
-    mostrarEscenaCinco();
+    // El acceso de revisión espera a que se inicialicen los estados de los capítulos.
+    queueMicrotask(mostrarEscenaCinco);
   }
 }
 
@@ -1192,6 +1205,8 @@ const iniciarLluviaCierreEstelar = () => {
   cierreEstelar.lluviaIniciada = true;
   lluviaEstrellasCap3.redimensionar();
   lluviaEstrellasCap3.iniciar({ duracion: 5 });
+  sincronizarEfectosNarrativos();
+  efectosNarrativos.disparar("lluvia");
 };
 let precargaCap3 = null;
 const cargarRecursosCap3 = () => {
@@ -1330,13 +1345,76 @@ const cargarImagenCap2 = (nombre) => {
 
 // Audio sintetizado de baja intensidad. Se crea/reanuda solo desde un gesto;
 // no depende de archivos ni condiciona la navegación si el navegador lo bloquea.
+const vocesPensamiento = [];
+const detenerSonidosPensamiento = () => {
+  for (const voz of vocesPensamiento.splice(0)) {
+    voz.ganancia.gain.cancelScheduledValues(voz.audio.currentTime);
+    voz.ganancia.gain.setValueAtTime(0, voz.audio.currentTime);
+    try { voz.oscilador.stop(); } catch { /* Voz ya terminada. */ }
+    voz.oscilador.disconnect();
+    voz.ganancia.disconnect();
+  }
+  nodoCap2.dataset.vocesPensamiento = "0";
+};
+const sonarPensamientoCap2 = () => {
+  const audio = cap2.audio;
+  if (!cap2.activo || cap2.estado !== "pensamiento" || cap2.silencio
+    || cap2.tapsPensamiento < 1 || cap2.tapsPensamiento > 6
+    || !audio || audio.state === "closed" || document.hidden || !estaHorizontal()
+    || recorrido.pausaRevision || cap2.error) return;
+  try {
+    let inicio = audio.currentTime;
+    // Tres voces como máximo. Un tap rápido sustituye suavemente a la más antigua.
+    if (vocesPensamiento.length >= 3) {
+      const anterior = vocesPensamiento.shift();
+      const gain = anterior.ganancia.gain;
+      gain.cancelScheduledValues(inicio);
+      gain.setValueAtTime(gain.value, inicio);
+      gain.linearRampToValueAtTime(0, inicio + .003);
+      anterior.oscilador.stop(inicio + .003);
+      inicio += .003;
+    }
+    const semitonos = [-1, 1, 0, 2, -2, 1][(cap2.tapsPensamiento - 1) % 6];
+    const frecuencia = 1120 * 2 ** (semitonos / 12);
+    const oscilador = audio.createOscillator();
+    const ganancia = audio.createGain();
+    const voz = { audio, oscilador, ganancia };
+    oscilador.type = "sine";
+    oscilador.frequency.setValueAtTime(frecuencia * 1.25, inicio);
+    oscilador.frequency.exponentialRampToValueAtTime(frecuencia * .75, inicio + .095);
+    ganancia.gain.setValueAtTime(.0001, inicio);
+    ganancia.gain.linearRampToValueAtTime(.03, inicio + .004);
+    ganancia.gain.exponentialRampToValueAtTime(.0001, inicio + .11);
+    oscilador.connect(ganancia);
+    ganancia.connect(audio.destination);
+    vocesPensamiento.push(voz);
+    oscilador.onended = () => {
+      oscilador.disconnect(); ganancia.disconnect();
+      const i = vocesPensamiento.indexOf(voz);
+      if (i !== -1) vocesPensamiento.splice(i, 1);
+      nodoCap2.dataset.vocesPensamiento = String(vocesPensamiento.length);
+    };
+    oscilador.start(inicio);
+    oscilador.stop(inicio + .115);
+    nodoCap2.dataset.sonidosPensamiento = String(Number(nodoCap2.dataset.sonidosPensamiento || 0) + 1);
+    nodoCap2.dataset.vocesPensamiento = String(vocesPensamiento.length);
+  } catch { /* El gesto visual se conserva en navegadores sin audio. */ }
+};
 const desbloquearAudioCap2 = () => {
   if (cap2.silencio) return;
   try {
     const Contexto = window.AudioContext || window.webkitAudioContext;
     if (!Contexto) return;
-    if (!cap2.audio) cap2.audio = new Contexto();
-    if (cap2.audio.state === "suspended") cap2.audio.resume().catch(() => {});
+    if (!cap2.audio) {
+      cap2.audio = new Contexto();
+      const audio = cap2.audio;
+      let estuvoActivo = audio.state === "running";
+      audio.onstatechange = () => {
+        if (audio.state === "running") estuvoActivo = true;
+        else if (estuvoActivo) detenerSonidosPensamiento();
+      };
+    }
+    if (cap2.audio.state !== "running") cap2.audio.resume().catch(() => {});
   } catch { /* La historia también funciona en silencio. */ }
 };
 const sonarCap2 = (tipo, ignorarOrientacion = false) => {
@@ -1611,7 +1689,7 @@ const crecerPensamientoCap2 = () => {
   );
   nodoCap2.style.setProperty("--calidez", .10 + taps * .02);
   nodoCap2.dataset.progresoPensamiento = String(taps);
-  sonarCap2("glow");
+  sonarPensamientoCap2();
   if (taps === 6) {
     estadoCap2("recuerdo");
   }
@@ -1662,7 +1740,9 @@ const escribirCap2 = (lado) => {
     estadoCap2("mensaje");
     progresoCap2.textContent = "";
     nodoCap2.style.setProperty("--calidez", .28);
-    sonarCap2("mensaje");
+    sincronizarEfectosNarrativos();
+    efectosNarrativos.disparar("enviar");
+    efectosNarrativos.disparar("hola");
   }
 };
 
@@ -1726,11 +1806,13 @@ const actualizarCap2 = (ahora) => {
 
 const sincronizarCap2 = () => {
   sincronizarMusica();
+  sincronizarEfectosNarrativos();
   emojisConversacionCap2?.sincronizar();
   if (!cap2.activo) return;
   window.cancelAnimationFrame(cap2.raf);
   cap2.ultimoTiempo = null;
   const pausado = document.hidden || !estaHorizontal();
+  if (pausado) detenerSonidosPensamiento();
   nodoCap2.classList.toggle("en-pausa", pausado);
   nodoCap2.querySelector(".cap2-orientacion").textContent = revisionGiro
     ? "Usa el control superior para girar a horizontal"
@@ -1843,6 +1925,7 @@ const iniciarCierreEstelar = () => {
 const prepararCierreEstelar = () => {
   if (cierreEstelar.activo || cierreEstelar.pendiente || cierreEstelar.reiniciando) return;
   cierreEstelar.pendiente = true;
+  efectosNarrativos.detener("vueltas");
   window.cancelAnimationFrame(cierreEstelar.rafAcceso);
   window.clearTimeout(cap3.timerPresionDoble);
   window.clearTimeout(cap3.timerCuadroCuatro);
@@ -1859,11 +1942,13 @@ const actualizarAccesoCierreEstelar = (ahora) => {
   const dt = cierreEstelar.ultimoAcceso === null ? 0 : Math.min(64, ahora - cierreEstelar.ultimoAcceso);
   cierreEstelar.ultimoAcceso = ahora;
   cierreEstelar.tiempoAcceso += dt;
+  sincronizarEfectosNarrativos();
   if (cierreEstelar.tiempoAcceso >= DURACION_ENCUENTRO_CAP3) prepararCierreEstelar();
   else cierreEstelar.rafAcceso = requestAnimationFrame(actualizarAccesoCierreEstelar);
 };
 
 const sincronizarCierreEstelar = () => {
+  sincronizarEfectosNarrativos();
   cancelAnimationFrame(cierreEstelar.rafAcceso);
   cancelAnimationFrame(cierreEstelar.rafEntrada);
   cierreEstelar.ultimoAcceso = null;
@@ -1906,6 +1991,7 @@ const reiniciarExperiencia = (event) => {
   event.preventDefault();
   if (cierreEstelar.reiniciando) return;
   limpiarCierreEstelar();
+  efectosNarrativos.destruir();
   bandaSonora.destruir();
   emojisConversacionCap2?.destruir();
   cap2.activo = false;
@@ -1918,6 +2004,7 @@ const reiniciarExperiencia = (event) => {
   detenerAudioOjosFinal();
   detenerAudioEscritura();
   detenerAudioPensamiento();
+  detenerSonidosPensamiento();
   cap2.audio?.close().catch(() => {});
   nodoCierreEstelar.dataset.estado = "reiniciando";
   // Navegar sin parámetros reconstruye todos los estados desde la introducción.
@@ -2026,6 +2113,7 @@ const volverCuadroCuatroCap3 = () => {
   cancelAnimationFrame(cierreEstelar.rafAcceso);
   cierreEstelar.tiempoAcceso = 0;
   cap3.cuadroCincoActivo = false;
+  efectosNarrativos.detener("vueltas", .1);
   cap3.escena = 3;
   nodoCap3.classList.remove("mostrar-cuadro-cinco");
   nodoCap3.classList.add("cuadro-cuatro-gris");
@@ -2157,6 +2245,7 @@ deslizarCap3.addEventListener("click", () => {
 
 const prepararCapituloTres = () => {
   if (!cap2.activo || cap2.estado !== "final" || cap3.esperandoGiro || cap3.activo) return;
+  efectosNarrativos.detener("enviar", .1);
   cap3.esperandoGiro = true;
   cap2.activo = false;
   emojisConversacionCap2?.sincronizar();
@@ -2259,6 +2348,7 @@ botonSonidoGlobal.addEventListener("click", () => {
     reproducirAudioPensamiento();
     window.setTimeout(() => sonarCap2("glow", true), 20);
   } else {
+    detenerSonidosPensamiento();
     detenerAudioOjosFinal();
     detenerAudioEscritura();
     detenerAudioPensamiento();
@@ -2266,7 +2356,8 @@ botonSonidoGlobal.addEventListener("click", () => {
     if (cap2.audio?.state === "running") cap2.audio.suspend().catch(() => {});
   }
   sincronizarMusica();
-  if (activo) bandaSonora.desbloquear();
+  sincronizarEfectosNarrativos();
+  if (activo) { bandaSonora.desbloquear(); efectosNarrativos.desbloquear(); }
 });
 
 const elementoPantallaCompleta = () => document.fullscreenElement || document.webkitFullscreenElement;
@@ -2301,6 +2392,24 @@ botonPantallaGlobal.addEventListener("click", async () => {
 document.addEventListener("fullscreenchange", actualizarControlPantalla);
 document.addEventListener("webkitfullscreenchange", actualizarControlPantalla);
 document.addEventListener("pointerdown", desbloquearAudioOjosFinal, { once: true });
+const desbloquearEfectosNarrativos = (event) => {
+  if (!event.isTrusted || (event.type === "keydown" && !["Enter", " "].includes(event.key))) return;
+  sincronizarEfectosNarrativos();
+  efectosNarrativos.desbloquear();
+};
+["pointerdown", "keydown"].forEach((tipo) => {
+  document.addEventListener(tipo, desbloquearEfectosNarrativos, { capture: true, passive: true });
+});
+window.addEventListener("blur", () => {
+  efectosNarrativos.suspenderPagina();
+  bandaSonora.suspenderPagina();
+  detenerSonidosPensamiento();
+});
+window.addEventListener("focus", () => {
+  efectosNarrativos.reanudarPagina();
+  sincronizarEfectosNarrativos();
+  bandaSonora.reanudarPagina();
+});
 nodoCap2.querySelector(".cap2-reintentar").addEventListener("click", () => {
   if (cap2.reintentar) operacionCap2(cap2.reintentar);
 });
@@ -2323,14 +2432,19 @@ document.addEventListener("visibilitychange", () => {
   if (!document.hidden && bandaSonora.desbloqueada) bandaSonora.desbloquear();
 });
 window.addEventListener("pagehide", (event) => {
-  if (event.persisted) bandaSonora.suspenderPagina();
+  if (event.persisted) { bandaSonora.suspenderPagina(); efectosNarrativos.suspenderPagina(); }
   else {
+    detenerSonidosPensamiento();
+    efectosNarrativos.destruir();
     bandaSonora.destruir();
     limpiarCierreEstelar();
   }
 });
 window.addEventListener("pageshow", (event) => {
-  if (event.persisted) { sincronizarMusica(); bandaSonora.reanudarPagina(); }
+  if (event.persisted) {
+    sincronizarMusica(); bandaSonora.reanudarPagina();
+    efectosNarrativos.reanudarPagina(); sincronizarEfectosNarrativos();
+  }
 });
 estadoMusicaListo = true;
 sincronizarMusica();

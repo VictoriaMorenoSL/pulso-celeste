@@ -140,7 +140,7 @@ horizonte suave. No solicita ni depende de girar el dispositivo; mantiene su
 proporción vertical incluso en una ventana horizontal.
 
 El fondo entra en 1100 ms. Solo cuando es opaco se oculta el capítulo anterior,
-se activa la música final y se inicia la lluvia: nunca hay estrellas sobre
+la música continua se mantiene y se inicia la lluvia: nunca hay estrellas sobre
 Chispita, ni siquiera durante la transición. La lluvia utiliza exclusivamente
 `assets/lluvia-estrellas.png`, sin modificarlo, con partículas laterales/diagonales
 hacia abajo e izquierda, tamaño fijo y profundidad por tamaño/opacidad/velocidad.
@@ -253,31 +253,67 @@ Resultado de esta revisión: sintaxis JavaScript y pruebas de lógica correctas;
 
 **Pendiente de validación real:** Safari/iOS y Chrome/Android en teléfono físico, giros y permisos de sensores, paralaje físico, zonas seguras, tacto/multitáctil, volumen y desbloqueo de audio. Los movimientos articulados mencionados arriba requieren recursos adicionales y no se reportan como terminados.
 
-## Banda sonora original — maquetas para aprobación
+## Música continua y pensamiento
 
-Las cuatro pistas MP3 físicas están en `assets/Audios/Musica/`. Son composiciones
-originales sintetizadas y provisionales, pendientes de escucha y aprobación;
-no se presentan como una producción cinematográfica definitiva. Se pueden
-escuchar por separado en `desarrollo/musica.html`, sin cambiar el diseño de la
-experiencia. Su procedencia, duraciones y regeneración están documentadas en
-`assets/Audios/Musica/README.md` y `manifiesto.json`.
+La única música ambiental de la experiencia es
+`assets/Audios/fondo.mp3`. `assets/audio/banda-sonora.js` la reproduce en bucle
+al 12 % desde el primer gesto que habilita el audio, con fade in de 1,5 s.
+El nivel se ajusta independientemente con `BACKGROUND_MUSIC_VOLUME = 0.12`.
+La misma reproducción acompaña las estrellas, el título y los créditos hasta
+reiniciar o salir; la lluvia no corta la música al terminar sus cinco segundos.
+`vista.mp3` se conserva archivado y no se carga como ambiente.
+Los cambios de capítulo, pensamiento, envío, conversación y cierre no cambian ni
+reinician la fuente musical. El control global, la pausa de revisión, los estados
+que bloquean la narrativa, la pérdida de foco, pestaña oculta, BFCache y reinicio
+conservan un estado coherente sin fuentes duplicadas. Al reanudar se conserva la
+posición; reiniciar vuelve a la introducción sin audio activo hasta otro gesto.
 
-El controlador `assets/audio/banda-sonora.js` se carga antes de `amor.js`, requiere
-un gesto real para desbloquear Web Audio y mantiene una sola fuente ambiental.
-El primer encuentro acompaña el capítulo 1; el estado `pensamiento` inicia el
-pulso; el tap 20 envía «Hola...» y `estadoCap2("mensaje")` cambia a la melodía
-romántica. Esta continúa durante conversación y capítulo 3. La pista final se
-activa exclusivamente cuando `cierreEstelar.presentado` confirma que el fondo
-independiente está visible. Nunca se activa en Chispita girando.
+Las cuatro músicas anteriores permanecen archivadas en `assets/Audios/Musica/`,
+con su manifiesto y procedencia, pero no se cargan ni se seleccionan en la
+experiencia. `desarrollo/musica.html` es únicamente su escucha de archivo.
 
-Los cambios de pista hacen fundidos secuenciales. Silencio, pausa, giro, errores,
-pestaña oculta y BFCache conservan un estado coherente sin fuentes duplicadas.
-Una pausa de orientación conserva la posición musical; un giro sin pausa ni
-cambio narrativo conserva la reproducción. Los efectos existentes siguen con sus
-archivos y sistema originales. Los nuevos MP3 suman 5,8 MB, usan rutas relativas,
-no están ignorados y se pueden compartir por GitHub. No hay dependencias nuevas
-para ejecutar el sitio. Las herramientas opcionales de autoría viven en
-`scripts/generar_musica.py`; las pruebas usan `node --test tests/banda-sonora.test.cjs`.
+Cada uno de los seis taps válidos de pensamiento llama sincrónicamente a
+`sonarPensamientoCap2()`, usando el mismo AudioContext de los efectos existentes.
+Es un pop sinusoidal de 110 ms, con pequeñas variaciones de tono, volumen acotado
+y tres voces como máximo. Los taps rápidos sustituyen la voz más antigua con un
+fundido de 3 ms. Las colas terminan por sí mismas; silencio, pausa y reinicio las
+limpian. Fuera de `pensamiento` no se crean notas. No se modifica ni se reproduce
+el archivo largo `pensamiento.mp3` por tap; su uso narrativo anterior se conserva.
+
+Pruebas: `node --test tests/*.test.cjs`. La validación física de volumen y
+restricciones de Safari/iOS y Chrome/Android sigue siendo necesaria.
+
+## Efectos sonoros narrativos
+
+`assets/audio/efectos-narrativos.js` reproduce los efectos MP3 originales encontrados
+directamente en `assets/Audios/`, sobre la música continua:
+
+- `enviar-mensaje.mp3`: confirmación del tap 20 en `escribirCap2()`, capítulo 2;
+  1,2 segundos, una sola vez. Conserva el efecto de escritura y reemplaza únicamente
+  el tono sintetizado de confirmación.
+- `despues-hola.mp3`: atmósfera del primer envío (tap 20), además de la confirmación
+  breve. Entrada de 1 s, sostenimiento hasta el segundo 10 y salida del segundo
+  10 al 12. Usa una sola instancia que continúa entre los planos posteriores,
+  conservando posición y envolvente al pausar, silenciar, perder foco, ocultar la
+  pestaña o interrumpir el contexto. Su reloj es `audio.currentTime`, de modo que
+  ni la pausa ni el buffering consumen la duración. Al terminar se desconectan los
+  nodos, se retira `src` y se cancelan los temporizadores. No cambia ni reinicia `fondo.mp3`.
+- `Pulso_Celeste_Sonidos/lluvia_estrellas_5s.mp3`: una activación de cinco
+  segundos al comenzar la lluvia real, después de ocultar el escenario de
+  Chispita. Respeta el silencio global y no detiene la música de fondo.
+- `vueltas.mp3`: al mostrarse el quinto cuadro tras 700 ms con ambas manos;
+  acompaña los 2,6 segundos de movimiento previos al cierre. Soltar detiene el
+  efecto con un fade de 100 ms; el paso al cierre lo detiene por completo.
+
+Los archivos duran más que las acciones; no se recortan ni se modifican. Se usan
+ventanas de reproducción y envolventes de Web Audio con un elemento por efecto,
+sin decodificar los MP3 completos en memoria. El desbloqueo ocurre dentro de un
+gesto real, incluido el inicio diferido del giro en iOS. Silencio, pausa, pestaña
+oculta, pérdida de foco, BFCache y reinicio cancelan la reproducción; las
+confirmaciones no se repiten al reanudar. La atmósfera del «Hola...» se pausa
+y conserva su progreso; el giro puede retomar desde su tiempo
+narrativo. Los estados se pueden inspeccionar en los elementos `audio` ocultos
+con el atributo `data-efecto-narrativo`. Pruebas: `node --test tests/*.test.cjs`.
 
 ## Compartir esta versión
 

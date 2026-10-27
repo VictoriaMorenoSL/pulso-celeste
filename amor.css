@@ -4,6 +4,8 @@
 
 :root {
   color-scheme: only light;
+  /* Misma familia que la instrucción de la primera pantalla narrativa. */
+  --fuente-experiencia: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
 html,
@@ -24,6 +26,7 @@ body {
 .lienzo {
   position: relative;
   isolation: isolate;
+  font-family: var(--fuente-experiencia);
   width: min(390px, 100vw, 56.25svh);
   height: auto;
   min-height: 0;
@@ -34,6 +37,14 @@ body {
   padding: max(20px, env(safe-area-inset-top)) 20px max(5svh, env(safe-area-inset-bottom));
   background: #1b141e;
   transition: width .9s cubic-bezier(.22, 1, .36, 1), aspect-ratio .9s cubic-bezier(.22, 1, .36, 1);
+}
+
+/* Los controles narrativos también heredan la familia, sin perder su jerarquía. */
+.lienzo button,
+.lienzo input,
+.lienzo select,
+.lienzo textarea {
+  font-family: inherit;
 }
 
 .control-sonido-global,
@@ -205,8 +216,8 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 18px;
-  padding: 34px;
+  gap: clamp(12px, 2.2svh, 18px);
+  padding: clamp(16px, 4vmin, 34px);
   color: #fff;
   background: rgb(27 20 30 / 94%);
   text-align: center;
@@ -216,29 +227,45 @@ body {
 .permiso-camara[hidden] { display: none; }
 .permiso-camara.saliendo { opacity: 0; visibility: hidden; pointer-events: none; transition-delay: 0s, .55s; }
 
-.permiso-camara > p { margin: 0; }
+.permiso-camara > p { margin: 0; flex-shrink: 0; }
 
 .permiso-camara > p:first-child {
-  font: 600 clamp(.8rem, 3.5vw, 1rem)/1.35 system-ui, sans-serif;
+  font: 600 clamp(.8rem, 3.5vmin, 1rem)/1.35 var(--fuente-experiencia);
   letter-spacing: .12em;
 }
 
 .permiso-camara-detalle {
   max-width: 330px;
   color: rgb(255 255 255 / 72%);
-  font: 400 clamp(.68rem, 2.8vw, .82rem)/1.55 system-ui, sans-serif;
+  font: 400 clamp(.8125rem, 3.6vmin, .9375rem)/1.6 var(--fuente-experiencia);
 }
 
 .permiso-camara button {
-  min-width: 178px;
-  padding: 12px 18px;
+  min-width: 0;
+  width: min(100%, 280px);
+  flex-shrink: 0;
+  min-height: 44px;
+  padding: 12px 16px;
   border: 1px solid rgb(255 255 255 / 68%);
   border-radius: 999px;
   color: #fff;
   background: rgb(255 255 255 / 8%);
-  font: 600 .7rem/1.2 system-ui, sans-serif;
+  font: 600 .75rem/1.4 var(--fuente-experiencia);
   letter-spacing: .1em;
   cursor: pointer;
+}
+
+/* La entrada sigue siendo vertical; en una ventana horizontal corta se compacta
+   solo la composición tipográfica del permiso para mantener visibles los botones. */
+@media (orientation: landscape) and (max-height: 420px) {
+  .permiso-camara { gap: 8px; padding: 16px 12px; }
+  .permiso-camara > p:first-child { font-size: clamp(11px, 3.4vmin, 14px); }
+  .permiso-camara-detalle { font-size: clamp(12px, 3.5vmin, 14px); }
+  .permiso-camara button {
+    padding: 10px 8px;
+    font-size: .6875rem;
+    letter-spacing: .08em;
+  }
 }
 
 .permiso-camara button:disabled { opacity: .48; cursor: wait; }
@@ -275,7 +302,7 @@ body {
   width: max-content;
   max-width: calc(100% - 40px);
   color: #fff;
-  font: 500 clamp(.72rem, 3.4vw, .88rem)/1.3 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font: 500 clamp(.72rem, 3.4vw, .88rem)/1.3 var(--fuente-experiencia);
   letter-spacing: .1em;
   text-transform: uppercase;
   opacity: 0;
@@ -293,7 +320,7 @@ body {
   width: calc(100% - 40px);
   margin: 0;
   color: #fff;
-  font: 500 clamp(.72rem, 3.4vw, .88rem)/1.3 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font: 500 clamp(.72rem, 3.4vw, .88rem)/1.3 var(--fuente-experiencia);
   letter-spacing: .1em;
   text-align: center;
   text-transform: uppercase;
@@ -788,13 +815,12 @@ body {
 .texto-control {
   position: absolute;
   top: calc(100% + 12px);
-  left: 50%;
+  right: 0;
   width: max-content;
   color: rgb(255 255 255 / 78%);
-  font: 500 clamp(.54rem, 1.35vw, .72rem)/1.2 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font: 500 clamp(.625rem, 1.35vw, .72rem)/1.2 var(--fuente-experiencia);
   letter-spacing: .1em;
   text-transform: uppercase;
-  transform: translateX(-50%);
   opacity: 0;
   transition: opacity .75s ease;
   pointer-events: none;
@@ -980,7 +1006,7 @@ body {
   width: 80%;
   color: #fff;
   text-align: center;
-  font: 500 .72rem/1.5 system-ui, sans-serif;
+  font: 500 .72rem/1.5 var(--fuente-experiencia);
   letter-spacing: .08em;
   text-transform: uppercase;
   pointer-events: none;
@@ -1016,7 +1042,7 @@ body {
   transform: translateX(-50%);
   color: rgb(255 255 255 / 85%);
   text-align: center;
-  font: 500 clamp(.58rem, 1.35vw, .85rem)/1.4 system-ui, sans-serif;
+  font: 500 clamp(.66rem, 1.35vw, .85rem)/1.4 var(--fuente-experiencia);
   text-transform: uppercase;
   letter-spacing: .1em;
   pointer-events: none;
@@ -1262,7 +1288,7 @@ body {
   transform: translateX(-50%);
   color: #ffe7ce;
   text-shadow: 0 0 16px rgb(244 158 68 / 35%);
-  font: 500 clamp(.8rem, 2.5vw, 1.5rem)/1.2 system-ui, sans-serif;
+  font: 500 clamp(.8rem, 2.5vw, 1.5rem)/1.2 var(--fuente-experiencia);
   letter-spacing: .04em;
   pointer-events: none;
 }
@@ -1308,7 +1334,7 @@ body {
   border: 0;
   background: transparent;
   color: rgb(255 255 255 / 65%);
-  font: 500 clamp(.55rem, 1.2vw, .75rem)/1.3 system-ui, sans-serif;
+  font: 500 clamp(.55rem, 1.2vw, .75rem)/1.3 var(--fuente-experiencia);
   letter-spacing: .06em;
   cursor: pointer;
 }
@@ -1438,7 +1464,7 @@ body {
 
 .cierre-estelar-dedicatoria {
   margin: 9cqw 0 0;
-  font: italic 400 clamp(11px, 3.45cqw, 15px)/1.7 Georgia, serif;
+  font: italic 400 clamp(11px, 3.45cqw, 15px)/1.7 var(--fuente-experiencia);
   letter-spacing: .015em;
   color: #fff0e2;
   text-shadow: 0 1px 14px rgb(36 24 48 / 45%);
@@ -1452,7 +1478,7 @@ body {
   width: 86%;
   text-align: center;
   opacity: var(--mensaje-cierre);
-  font: 400 clamp(11px, 3.5cqw, 15px)/1.65 Georgia, serif;
+  font: 400 clamp(11px, 3.5cqw, 15px)/1.65 var(--fuente-experiencia);
   color: #fff0e5;
   text-shadow: 0 1px 16px rgb(37 25 44 / 40%);
   pointer-events: none;
@@ -1461,7 +1487,7 @@ body {
 .cierre-estelar-creditos p { margin: 0 0 2.5cqw; text-wrap: balance; }
 .cierre-estelar-creditos .cierre-estelar-firma {
   margin-bottom: 4.5cqw;
-  font: 400 clamp(8px, 2.4cqw, 10px)/1.5 Georgia, serif;
+  font: 400 clamp(9px, 2.7cqw, 11px)/1.5 var(--fuente-experiencia);
   letter-spacing: .25em;
   color: #e8d6dd;
 }
@@ -1480,7 +1506,7 @@ body {
   transform: translateX(-50%);
   white-space: nowrap;
   color: #fff0de;
-  font: 400 clamp(10px, 2.8cqw, 12px)/1.5 Georgia, serif;
+  font: 400 clamp(11px, 3cqw, 13px)/1.5 var(--fuente-experiencia);
   letter-spacing: .13em;
   text-decoration: underline;
   text-underline-offset: 7px;
@@ -1609,7 +1635,7 @@ body {
   bottom: calc(11% - 24px);
   z-index: 3;
   color: #fff;
-  font: 700 .66rem/1 system-ui, sans-serif;
+  font: 700 .66rem/1 var(--fuente-experiencia);
   letter-spacing: .16em;
   text-shadow: 0 2px 8px rgb(20 24 42 / 55%);
   opacity: 0;
@@ -1722,7 +1748,7 @@ body {
   z-index: 2;
   top: calc(45.15625% + 62px);
   color: #fff;
-  font: 700 .66rem/1 system-ui, sans-serif;
+  font: 700 .66rem/1 var(--fuente-experiencia);
   letter-spacing: .16em;
   text-shadow: 0 2px 8px rgb(20 24 42 / 55%);
   opacity: 0;
@@ -1906,7 +1932,7 @@ body {
   background: transparent;
   box-shadow: none;
   color: #fff;
-  font: 600 clamp(.72rem, 3.4vw, .9rem)/1.2 system-ui, sans-serif;
+  font: 600 clamp(.72rem, 3.4vw, .9rem)/1.2 var(--fuente-experiencia);
   letter-spacing: .09em;
   text-transform: uppercase;
   text-shadow: 0 2px 10px rgb(28 35 58 / 38%);

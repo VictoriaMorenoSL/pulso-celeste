@@ -2,23 +2,12 @@
    su propio sistema. Sin autoplay: AudioContext se desbloquea desde un gesto. */
 (() => {
   "use strict";
+  // Una única identidad musical: ninguna escena selecciona ni reinicia pistas.
+  const BACKGROUND_MUSIC_VOLUME = 0.12;
+  const BACKGROUND_FADE_IN_SECONDS = 1.5;
   const PISTAS = Object.freeze({
-    encuentro: { archivo: "assets/Audios/Musica/cap01_primer_encuentro.mp3", volumen: .28 },
-    pulso: { archivo: "assets/Audios/Musica/cap02_pulso.mp3", volumen: .24 },
-    hola: { archivo: "assets/Audios/Musica/cap02_despues_del_hola.mp3", volumen: .30 },
-    final: { archivo: "assets/Audios/Musica/final_amor_creciente.mp3", volumen: .32 }
+    fondo: { archivo: "assets/Audios/fondo.mp3", volumen: BACKGROUND_MUSIC_VOLUME }
   });
-
-  // Esta selección depende de estados narrativos, nunca de la duración musical.
-  const seleccionarAmbiente = ({ cierrePresentado, capituloTres, esperaTres, capituloDos, estadoDos }) => {
-    if (cierrePresentado) return "final";
-    if (capituloTres || esperaTres) return "hola";
-    if (capituloDos) {
-      if (["mensaje", "conversacion", "final"].includes(estadoDos)) return "hola";
-      if (["pensamiento", "recuerdo", "disolucion", "escritura"].includes(estadoDos)) return "pulso";
-    }
-    return "encuentro";
-  };
 
   class BandaSonora {
     constructor(alEstado = () => {}) {
@@ -34,12 +23,15 @@
       this.paginaSuspendida = false;
       this.destruida = false;
       this.estado = "esperando-gesto";
+      this.secuenciaFuentes = 0;
     }
 
     publicar(estado, error = "") {
       this.estado = estado;
       this.alEstado({ estado, deseada: this.config.pista || "", actual: this.actual?.id || "",
+        archivo: PISTAS[this.config.pista]?.archivo || "", volumen: PISTAS[this.config.pista]?.volumen || 0,
         contexto: this.contexto?.state || "sin-iniciar", duracion: this.actual?.buffer.duration || 0,
+        fuente: this.actual?.secuencia || 0,
         segundo: this.actual ? (this.actual.offset + Math.max(0, this.contexto.currentTime - this.actual.inicio)) % this.actual.buffer.duration
           : this.posicion?.segundo || 0, error });
     }
@@ -72,7 +64,10 @@
       if (this.destruida) return;
       const siguiente = { pista: config.pista || null, pausa: Boolean(config.pausa),
         mudo: Boolean(config.mudo), inmediata: Boolean(config.inmediata) };
-      if (Object.keys(siguiente).every((clave) => siguiente[clave] === this.config[clave])) return;
+      if (Object.keys(siguiente).every((clave) => siguiente[clave] === this.config[clave])) {
+        this.publicar(this.estado);
+        return;
+      }
       this.config = siguiente;
       this.procesar(++this.revision);
     }
@@ -184,9 +179,10 @@
       fuente.connect(ganancia);
       ganancia.connect(this.contexto.destination);
       ganancia.gain.setValueAtTime(0, this.contexto.currentTime);
-      this.actual = { id, fuente, ganancia, buffer, offset, inicio: this.contexto.currentTime };
+      this.actual = { id, fuente, ganancia, buffer, offset, inicio: this.contexto.currentTime,
+        secuencia: ++this.secuenciaFuentes };
       fuente.start(0, offset);
-      this.fundir(PISTAS[id].volumen, 1.4);
+      this.fundir(PISTAS[id].volumen, BACKGROUND_FADE_IN_SECONDS);
       // Liberar los PCM de escenas anteriores: solo permanece el buffer activo.
       for (const clave of this.cache.keys()) if (clave !== id) this.cache.delete(clave);
       this.publicar("sonando");
@@ -207,6 +203,7 @@
     }
 
     destruir() {
+      if (this.destruida) return;
       this.destruida = true;
       ++this.revision;
       this.cancelarFundido?.();
@@ -216,5 +213,5 @@
     }
   }
 
-  window.PulsoMusica = { BandaSonora, seleccionarAmbiente, PISTAS };
+  window.PulsoMusica = { BandaSonora, PISTAS, BACKGROUND_MUSIC_VOLUME, BACKGROUND_FADE_IN_SECONDS };
 })();

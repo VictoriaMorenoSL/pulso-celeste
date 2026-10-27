@@ -39,6 +39,9 @@ test("las dos manos conservan su interacción y abren directamente el cierre ver
       assert.equal(opciones.duracion, 5); ++emisiones;
     } },
     bandaSonora: { destruir() { ++musicaDetenida; } }, emojisConversacionCap2: { destruir() {} },
+    detenerSonidosPensamiento() {}, sincronizarEfectosNarrativos() {}, efectosNarrativos: {
+      detener() {}, destruir() {}, disparar(id) { assert.equal(id, 'lluvia'); assert.equal(viejo.hidden, true); }
+    },
     cap2: { activo: false, raf: 0, audio: { close: () => Promise.resolve() } }, animacionCaminata: 0,
     detenerAnimacionChispita() {}, detenerLecturaCamara() {}, detenerParallax() {},
     detenerAudioOjosFinal() { ++efectosDetenidos; }, detenerAudioEscritura() { ++efectosDetenidos; }, detenerAudioPensamiento() { ++efectosDetenidos; },
@@ -105,9 +108,9 @@ test("el cierre vertical no pausa la música por orientación; capítulo 2 manti
     cap3: { activo: false, esperandoGiro: false }, cierreEstelar: { activo: true, pendiente: false, presentado: true },
     recorrido: { pausaRevision: false }, escenaTresIniciada: true, estaHorizontal: () => false,
     lienzo: { dataset: {} }, bandaSonora: { actualizar(config) { seleccion = config; } },
-    window: { PulsoMusica: { seleccionarAmbiente: () => 'final' } } };
+    window: {} };
   vm.createContext(c);
   vm.runInContext(fragmento('const sincronizarMusica =', 'const orientacionHorizontal =') + '\nglobalThis.sync = sincronizarMusica;', c);
-  c.sync(); assert.equal(seleccion.pausa, false);
+  c.sync(); assert.equal(seleccion.pausa, false); assert.equal(seleccion.pista, "fondo");
   c.cierreEstelar.activo = false; c.cap2.activo = true; c.sync(); assert.equal(seleccion.pausa, true);
 });
