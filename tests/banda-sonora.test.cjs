@@ -54,14 +54,14 @@ function entorno() {
     vivas: () => vivas, maximo: () => maximo, peticiones: () => peticiones, fallar: (v) => { falla = v; } };
 }
 
-test("solo fondo usa la ruta solicitada, volumen independiente de 12 % y entrada de 1,5 s", () => {
+test("solo fondo usa la ruta solicitada, volumen independiente de 4 % y entrada de 1,5 s", () => {
   const c = { window: {}, Object }; vm.createContext(c); vm.runInContext(codigo, c);
   const pistas = c.window.PulsoMusica.PISTAS;
   assert.deepEqual(Object.keys(pistas), ["fondo"]);
   assert.equal(pistas.fondo.archivo, "assets/Audios/fondo.mp3");
   assert(fs.statSync(pistas.fondo.archivo).size > 100000);
-  assert.equal(pistas.fondo.volumen, .12);
-  assert.equal(c.window.PulsoMusica.BACKGROUND_MUSIC_VOLUME, .12);
+  assert.equal(pistas.fondo.volumen, .04);
+  assert.equal(c.window.PulsoMusica.BACKGROUND_MUSIC_VOLUME, .04);
   assert.equal(c.window.PulsoMusica.BACKGROUND_FADE_IN_SECONDS, 1.5);
   assert.equal(c.window.PulsoMusica.seleccionarAmbiente, undefined);
 });
@@ -73,7 +73,7 @@ test("sin autoplay; los cambios narrativos no reinician la fuente ni su bucle", 
   b.desbloquear(); await esperar();
   const actual = b.actual;
   assert.equal(actual.id, "fondo"); assert.equal(actual.fuente.loop, true);
-  assert(actual.ganancia.gain.rampas.some(([v, t]) => v === .12 && t === 1.5));
+  assert(actual.ganancia.gain.rampas.some(([v, t]) => v === .04 && t === 1.5));
   b.contexto.currentTime = 22.75;
   for (let i = 0; i < 25; ++i) {
     b.actualizar({ pista: "fondo" }); b.desbloquear();

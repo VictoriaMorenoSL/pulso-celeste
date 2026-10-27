@@ -257,8 +257,8 @@ Resultado de esta revisión: sintaxis JavaScript y pruebas de lógica correctas;
 
 La única música ambiental de la experiencia es
 `assets/Audios/fondo.mp3`. `assets/audio/banda-sonora.js` la reproduce en bucle
-al 12 % desde el primer gesto que habilita el audio, con fade in de 1,5 s.
-El nivel se ajusta independientemente con `BACKGROUND_MUSIC_VOLUME = 0.12`.
+al 4 % desde el primer gesto que habilita el audio, con fade in de 1,5 s.
+El nivel se ajusta independientemente con `BACKGROUND_MUSIC_VOLUME = 0.04`.
 La misma reproducción acompaña las estrellas, el título y los créditos hasta
 reiniciar o salir; la lluvia no corta la música al terminar sus cinco segundos.
 `vista.mp3` se conserva archivado y no se carga como ambiente.

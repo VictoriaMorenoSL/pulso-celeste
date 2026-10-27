@@ -3,7 +3,7 @@
 (() => {
   "use strict";
   // Una única identidad musical: ninguna escena selecciona ni reinicia pistas.
-  const BACKGROUND_MUSIC_VOLUME = 0.12;
+  const BACKGROUND_MUSIC_VOLUME = 0.04;
   const BACKGROUND_FADE_IN_SECONDS = 1.5;
   const PISTAS = Object.freeze({
     fondo: { archivo: "assets/Audios/fondo.mp3", volumen: BACKGROUND_MUSIC_VOLUME }
